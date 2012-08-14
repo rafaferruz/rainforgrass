@@ -42,6 +42,7 @@ Bounce bouncerSelect = Bounce( BUTTON_SELECT,5 );
 
 void setup() {
   Serial.begin(SERIAL_SPEED);
+  Serial.println(SERIAL_SPEED);
   // se definen el número de columnas y filas del LCD
   lcd.begin(LCD_COLUMNS, LCD_ROWS);
 
@@ -52,9 +53,7 @@ void setup() {
 
 	// Rellenamos las opciones del menú de la aplicación
   menux.addMenuOption( MenuOption( 1, "OPERACIONES", 0, 2, "", 0));
-  Serial.println(menux.getLastOption());
   menux.addMenuOption( MenuOption( 2, "Activar", 1, 0, "ON", 1));
-  Serial.println(menux.getLastOption());
   menux.addMenuOption( MenuOption( 2, "Desactivar", 1, 0, "OFF", 2));
   menux.addMenuOption( MenuOption( 1, "CONFIGURACION", 0, 50, "", 0));
   menux.addMenuOption( MenuOption( 50, "FECHA", 1, 51, "", 0));
@@ -70,6 +69,7 @@ void setup() {
   menux.setPresentMenuCode(MENU_START_CODE);
   menux.setTitleMenuOption(MENU_MAIN_TITLE);
 
+  menux.searchNextOption( 0, MENU_START_CODE);
   menux.showMenuOption(lcd);
 
 }

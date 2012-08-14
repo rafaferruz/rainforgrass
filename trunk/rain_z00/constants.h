@@ -24,7 +24,7 @@ const byte ACTION_ACTIVATE = 1;
 const byte ACTION_DEACTIVATE = 2;
 
 // Definición de parámetros de comunicaciones Serial
-const byte SERIAL_SPEED = 9600;
+const unsigned long SERIAL_SPEED = 9600;
 
 // Milisegundos entre consultas de estado de botones
 const byte DELAY_CHECK_BUTTONS = 100;
