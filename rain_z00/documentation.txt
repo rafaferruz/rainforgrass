@@ -1,0 +1,32 @@
+RAIN_Z application for Arduino
+
+Version 0.0
+
+by Rafael Ferruz Martínez
+
+contact: rafaferruz@hotmail.com
+
+See the online documentation here: No disposable
+
+
+OBJETIVOS
+=========
+
+RAIN_Z es una aplicación diseñada para controlar un sistema de riego mediante placas Arduino.
+
+	La idea inicial a desarrollar es diseñar un controlador central que permita transmitir a una electroválvula de riego la orden de abrir o cerrar el paso del agua de una zona de riego. En versiones posteriores se desarrollarán sistemas de programación de riego por zonas y control de tiempos. La particularidad de este diseño es que la comunicación entre el controlador central y la electrónica de control de la electroválvula deberá ser inalambrica vía radio para poder ser montada sin la necesidad de realizar obras de canalización de cableado soterradas o aéreas, con alcances cortos-medios (hasta 80-100 metros) y posibilidad de alcances medios-largos (hasta 2000 metros).
+
+	La idea inicial plantea la necesidad de diseñar y desarrollar tres partes: controlador central, control de electroválvula y medio de comunicación.
+
+CONTROLADOR CENTRAL
+===================
+
+	El controlador central es un instrumento que debe permitir al usuario la programación y envío de órdenes de arraque/parada a la electroválvula.
+
+	La comunicación entre el controlador y el usuario se realizará a través de un display LCD y un teclado de botones.
+
+	El diseño inicial incorporará un display LCD de 16x2 y soportará dos tipos de teclado de botones, una de ellas consistirá en tres botones y la otra permitirá utilizar un teclado (keypad) matricial de 12/16 botones.
+
+	El display LCD de 16 columnas por 2 filas debe ser compatible con el modelo    y se utilizará para su control la librería LiquidCrystal.
+
+	El método de funcionalidad mediante tres botones pulsadores permitirá al usuario dar órdenes de ejecución de operaciones y/o modificación de parámetros de la aplicación mediante la navegación a través de un menú mostrado en el display LCD, asignando a cada uno de los botones las funcionalidades de 'Retroceder a submenú anterior', 'Navegar a la siguiente opción  de un submenú o Cambiar el valor de un parámetro' y 'Seleccionar una opción de menú o validar el valor mostrado en el display'.
