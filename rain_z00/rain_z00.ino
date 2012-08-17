@@ -29,7 +29,7 @@ bool showAction = false;
 String optionValue = 0;
 MenuOption presentMenuOption;
 
-LiquidCrystal lcd(LCD_ENABLE, LCD_WRITE, LCD_DB4, LCD_DB5, LCD_DB6, LCD_DB7);
+LiquidCrystal lcd(LCD_REGISTER_SELECT, LCD_ENABLE, LCD_DB4, LCD_DB5, LCD_DB6, LCD_DB7);
 
 
 // Creamos un objeto para controlar el menú de opciones
@@ -81,12 +81,16 @@ void loop() {
 	// Consultamos si se ha pulsado algún botón
 	if (isButtonBackRising()) {
 		goBackMenu();
+                menux.showMenuOption(lcd);
 	} else if (isButtonOptionRising()) {
 		goNextOption();
+                menux.showMenuOption(lcd);
 	} else if (isButtonSelectRising()) {
 		presentMenuOption = menux.getPresentMenuOption();
 		// Recibimos el valor de la opción validada o un valor vacío si se trata de navegación a submenú
 		optionValue = goSelectOption();
+                menux.showMenuOption(lcd);
+
 		if (optionValue != 0) {
 			doAction(presentMenuOption, optionValue);
 		}

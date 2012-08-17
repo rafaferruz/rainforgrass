@@ -88,8 +88,6 @@ byte Menux::searchNextOption(byte fromOption, byte menuCodeToSearch) {
 
 void Menux::showMenuOption(LiquidCrystal &lcd) {
 	// Se envía al display el título del grupo de MenuOptions	
-Serial.println(getPresentMenuCode());
-Serial.println(getTitleMenuOption());
 	lcd.clear();
 	if (presentMenuCode == 1) {
 		titleMenuOption = "Menu General";
