@@ -1,13 +1,3 @@
-// La librería Bounce nos proporciona funcionalidad para comprobar el estado de los botones de control de la aplicación.
-#include <Bounce.h>
-// Se utiliza la librería LiquidCrystal.h para controlar el display LCD
-#include "LiquidCrystal.h"
-
-// Se incluyen las librerías MenuOption y Menux que permiten la creación de menúas utilizando un display LCD de 16x2
-#include <MenuOption.h>
-#include <Menux.h>
-
-
 /*
 rain_z00
  
@@ -17,9 +7,23 @@ rain_z00
  
  Descripción de la Fase 1:
  
- 	- Esta fase consiste en la activación y desactivación del solenoide de una electroválvula de riego. La placa Arduino lee el estado de tres pulsadores para la navegación a través del menú de la aplicación. Este menú proporciona funcionalidad para la activación y desactivación de la electroválvula.
+ 	- Aunque el objetivo de esta fase consista en la activación y desactivación del solenoide de una electroválvula
+          de riego, el desarrollo del siftware fue derivando hacia la presentacin sobre un display LCD de 2 filas por
+          16 columnas de un menu de opciones de control del solenoide. La placa Arduino lee el estado de tres pulsadores
+          para la navegación a través del menú de la aplicación. Este menú debera proporciona funcionalidad para la 
+          activación y desactivación de la electroválvula aunque no se ha implementado en esta fase.
  
  */
+
+// La librería Bounce nos proporciona funcionalidad para comprobar el estado de los botones de control de la aplicación.
+#include <Bounce.h>
+// Se utiliza la librería LiquidCrystal.h para controlar el display LCD
+#include "LiquidCrystal.h"
+
+// Se incluyen las librerías MenuOption y Menux que permiten la creación de menús utilizando un display LCD de 16x2
+#include <MenuOption.h>
+#include <Menux.h>
+
 
 // Se utiliza un fichero de configuración externo para aportar los estados iniciales.
 #include "constants.h"
