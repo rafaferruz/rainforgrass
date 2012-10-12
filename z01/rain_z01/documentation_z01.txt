@@ -1,0 +1,66 @@
+RAIN_Z application for Arduino
+
+Version 0.1
+
+by Rafael Ferruz Martínez
+
+contact: rafaferruz@hotmail.com
+
+See the online documentation here: No disposable
+
+
+OBJETIVOS
+=========
+
+RAIN_Z es una aplicación diseñada para controlar un sistema de riego mediante placas Arduino.
+
+	La idea inicial a desarrollar es diseñar un controlador central que permita transmitir a una electroválvula de riego la orden de abrir o cerrar el paso del agua de una zona de riego. En versiones posteriores se desarrollarán sistemas de programación de riego por zonas y control de tiempos. La particularidad de este diseño es que la comunicación entre el controlador central y la electrónica de control de la electroválvula deberá ser inalambrica vía radio para poder ser montada sin la necesidad de realizar obras de canalización de cableado soterradas o aéreas, con alcances cortos-medios (hasta 80-100 metros) y posibilidad de alcances medios-largos (hasta 2000 metros).
+
+	La idea inicial plantea la necesidad de diseñar y desarrollar tres partes: controlador central, control de electroválvula y medio de comunicación.
+
+CONTROLADOR CENTRAL
+===================
+
+	El controlador central es un instrumento que debe permitir al usuario la programación y envío de órdenes de arraque/parada a la electroválvula.
+
+	La comunicación entre el controlador y el usuario se realizará a través de un display LCD y un teclado de botones.
+
+	El diseño inicial incorporará un display LCD de 16x2 y soportará dos tipos de teclado de botones, una de ellas consistirá en tres botones y la otra permitirá utilizar un teclado (keypad) matricial de 16 botones.
+
+	El display LCD de 16 columnas por 2 filas debe ser compatible con el modelo    y se utilizará para su control la librería LiquidCrystal.
+
+	El método de funcionalidad mediante tres botones pulsadores permitirá al usuario dar órdenes de ejecución de operaciones y/o modificación de parámetros de la aplicación mediante la navegación a través de un menú mostrado en el display LCD, asignando a cada uno de los botones las funcionalidades de 'Retroceder a submenú anterior', 'Navegar a la siguiente opción  de un submenú o Cambiar el valor de un parámetro' y 'Seleccionar una opción de menú o validar el valor mostrado en el display'.
+
+	El método de funcionalidad mediante un teclado/keypad de 16 botones permitirá al usuario la navegación por los menús de la aplicación y la entrada de valores numéricos con las teclas numéricas del 0 al 9 del teclado. El resto de teclas su usarán para las diferentes funciones de navegación y operaciones de validación o borrado de valores. La siguiente tabla muestra la funcionalidad de cada tecla de comando:
+
+	#	Muestra el Menú principal o regresa al nivel superior inmediato a la opción de navegación en la que se encuentre el usuario.
+	D	Representa la tecla de validación de un valor mostrado o introducido por el teclado.
+	A	Subir a la opción anterior del nivel de navegación en el que se encuentre el usuario.
+	B	Baja a la opción siguiente del nivel de navegación en el que se encuentre el usuario.
+	C	Borra el último caracter introducido mediante el teclado.
+	*	Detiene la actividad de todos los dispositivos.
+
+
+MENU DE NAVEGACION
+==================
+
+	MENU GENERAL
+		MODO MANUAL
+			[1-4]D	Activa el dispositivo indicado mediante una cifra entre 1 y 4.
+			*	Detiene la actividad de todos los dispositivos.
+		MODO PROGRAMA
+		MODO CONFIGURACION	
+
+	
+	Esta primera versión del Menú General pretende únicamente establecer el modo de funcionamiento básico del teclado de la consola de usuario, por lo que no se desarrollan opciones en los modos PROGRAMA y CONFIGURACION, existiendo estos para establecer un menú de usuario mínimo.
+
+	La creación de menús en la aplicación se realiza mediante el uso de dos clases: Menux y MenuOption.
+	Menux ofrece la funcionalidad de navegación a través de las distintas opciones representadas por una colección de objetos MenuOption. Cada objeto MenuOption contiene las definiciones de cada una de las opciones del menú.
+	Para la creación de un objeto Menux se deben ir creando cada uno de los objetos MenuOption mediante el constructor que tiene la clase MenuOption y que van a definir cada una de las opciones. Los datos que se den suministrar como parámetros del constructor son:
+		- Código numérico asignado al grupo de opciones al que queramos que pertenezca la opción definida.
+		- Texto de la opción o solicitud de dato. Se trata de una palabra o texto con un máximo de 16 caracteres.
+		- Código numérico del grupo de opciones del nivel superior o a volver cuando se salga del grupo de la opción.
+		- Código numérico del grupo de opciones del nivel inferior o siguiente cuando opción a definir tenga un subnivel de opciones o datos a definir o configurar.
+		- Valor por defecto a asignar cuando se valide la opción sin proporcionar ningún valor por teclado.
+		- ??????
+
