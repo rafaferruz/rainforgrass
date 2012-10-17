@@ -55,10 +55,9 @@ byte Menux::goNextOption(byte indexOption) {
 }
 
 // Devuelve el valor de la option
-String Menux::goSelectOption(byte indexOption) {
+char* Menux::getSelectOptionValue(byte indexOption) {
 	if (menuOptionList[indexOption].getMenuNextCode() == 0) {
-		String returnedValue;
-		returnedValue = menuOptionList[indexOption].getDefaultValue();
+		char* returnedValue = menuOptionList[indexOption].getDefaultValue();
 		goBackMenu(indexOption);
 		return returnedValue;
 	} else {
@@ -72,14 +71,14 @@ byte Menux::searchNextOption(byte fromOption, byte menuCodeToSearch) {
 	for ( i = fromOption + 1; i < lastOption; i++) {
 		if (menuOptionList[i].getMenuCode() == menuCodeToSearch) {
 			presentMenuCode = menuOptionList[i].getMenuCode();
-			setTitleMenuOption(searchTitleMenuOption(i) + ": " + menuOptionList[fromOption].getDefaultValue());
+			setTitleMenuOption(*searchTitleMenuOption(i) + ": " + *menuOptionList[fromOption].getDefaultValue());
 			return i;
 		}
 	}
 	for ( i = 0; i < fromOption; i++) {
 		if (menuOptionList[i].getMenuCode() == menuCodeToSearch) {
 			presentMenuCode = menuOptionList[i].getMenuCode();
-			setTitleMenuOption(searchTitleMenuOption(i) + ": " + menuOptionList[fromOption].getDefaultValue());
+			setTitleMenuOption(*searchTitleMenuOption(i) + ": " + *menuOptionList[fromOption].getDefaultValue());
 			return i;
 		}
 	}
@@ -100,7 +99,14 @@ void Menux::showMenuOption(LiquidCrystal &lcd) {
 	return;
 }
 
-String Menux::searchTitleMenuOption(byte indexOption){
+void Menux::showMenuOption(LiquidCrystal &lcd, String value) {
+	showMenuOption(lcd);
+	// Se envía al display el valor adicional a mostrar
+	lcd.print(" " + value);
+	return;
+}
+
+char* Menux::searchTitleMenuOption(byte indexOption){
 	byte i;
 	for ( i = 0; i < lastOption; i++) {
 		if (menuOptionList[i].getMenuCode() == menuOptionList[indexOption].getMenuBackCode()) {

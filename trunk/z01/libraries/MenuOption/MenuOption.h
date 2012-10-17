@@ -6,26 +6,26 @@
 class MenuOption {
 public:
 	MenuOption() ;
-	MenuOption(byte, String optionText, byte menuBackCode, byte menuNextCode, String defaultValue, byte actionCode) ;
+	MenuOption(byte, char* optionText, byte menuBackCode, byte menuNextCode, char* defaultValue, byte actionCode) ;
  
 	void setMenuCode(byte menuCode) ;
-	void setOptionText(String optionText) ;
+	void setOptionText(char* optionText) ;
 	void setMenuNextCode(byte menuNextCode) ;
 	void setMenuBackCode(byte menuBackCode) ;
-	void setDefaultValue(String defaultValue) ;
+	void setDefaultValue(char* defaultValue) ;
 	void setActionCode(byte actionCode) ;
 	byte getMenuCode() ;
-	String getOptionText() ;
+	char* getOptionText() ;
 	byte getMenuNextCode() ;
 	byte getMenuBackCode() ;
-	String getDefaultValue() ;
+	char* getDefaultValue() ;
 	byte getActionCode() ;
 private:
 	byte menuCode;
-	String optionText;
+	char* optionText;
 	byte menuNextCode;
 	byte menuBackCode;
-	String defaultValue;
+	char* defaultValue;
 	byte actionCode;
 };
  

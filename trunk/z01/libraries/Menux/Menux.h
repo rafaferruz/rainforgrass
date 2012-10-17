@@ -17,17 +17,18 @@ public:
 	String getTitleMenuOption();
 	byte goBackMenu(byte indexOption);
 	byte goNextOption(byte indexOption);
-	String goSelectOption(byte indexOption);
+	char* getSelectOptionValue(byte indexOption);
 	byte searchNextOption(byte fromOption, byte menuCodeToSearch);
 	void showMenuOption(LiquidCrystal &lcd);
+	void showMenuOption(LiquidCrystal &lcd, String value);
   
 private:
-	MenuOption menuOptionList[20];
+	MenuOption menuOptionList[10];
 	byte lastOption;
 	byte presentOption;
 	byte presentMenuCode;
 	String titleMenuOption;
-	String searchTitleMenuOption(byte indexOption);
+	char* searchTitleMenuOption(byte indexOption);
   
 };
  
