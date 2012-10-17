@@ -18,8 +18,19 @@ rain_z01
  
  Descripción de la Fase 2:
  
- 	- Se pretende el uso de un teclado de 16 teclas para la entrada de órdenes de ejecución y valores de datos de configuración. El menú inicial a usar y mostrar en el display es bastante sencillo y solamente permitirá la activación de un dispositivo o electroválvula y su desactivación. Otras opciones se muestran solamente como soporte básico en la construcción del nivel superior del Menú Principal. No obstante, será posible indicar mediante un número entre 1 y 4 el dispositivo que debería ser activado en el supuesto de que se conectasen cuatro dispositivos el circuito. El software de control de la activación de los dispositivos no será desarrollado en esta fase.
+ 	- Se pretende el uso de un teclado de 16 teclas para la entrada de órdenes de ejecución y valores de datos 
+          de configuración. 
+          El menú inicial a usar y mostrar en el display es bastante sencillo y solamente permitirá la activación de 
+          un dispositivo o electroválvula y su desactivación. Otras opciones se muestran solamente como soporte básico
+          en la construcción del nivel superior del Menú Principal. No obstante, será posible indicar mediante un 
+          número entre 1 y 4 el dispositivo que debería ser activado en el supuesto de que se conectasen hasta cuatro 
+          dispositivos el circuito. 
+          El software de control de la activación de los dispositivos no será desarrollado en esta fase.
  */
+
+/* La libreria <pgmspace.h> proporciona las herramientas necesarias para manipular las variables de datos
+en la memoria flash */
+#include <pgmspace.h>
 
 // La librera Keypad proporciona funcionalidad para la entrada de datos desde teclados o keypads matriciales
 #include <Keypad.h>
@@ -38,9 +49,11 @@ rain_z01
 #include "constants.h"
 
 // Inicializamos las variables del programa
-bool showAction = false;
-String optionValue = 0;
+boolean showAction = false;
+byte activeMode = 0;
+char optionValue[4];
 MenuOption presentMenuOption;
+String keypadBuffer;
 
 LiquidCrystal lcd(LCD_REGISTER_SELECT, LCD_ENABLE, LCD_DB4, LCD_DB5, LCD_DB6, LCD_DB7);
 
@@ -48,10 +61,9 @@ LiquidCrystal lcd(LCD_REGISTER_SELECT, LCD_ENABLE, LCD_DB4, LCD_DB5, LCD_DB6, LC
 // Creamos un objeto para controlar el menú de opciones
 Menux menux = Menux();
 
-// Creamos un objeto para controlar entrada de rdenes desde un keypad
+// Creamos un objeto para controlar entrada de ordenes desde un keypad
 char keys[KEYPAD_ROWS][KEYPAD_COLUMNS];
 Keypad keypad = Keypad( makeKeymap( keys), KEYPAD_ROW_PINS, KEYPAD_COL_PINS, KEYPAD_ROWS, KEYPAD_COLUMNS); 
-
 
 // Fin de inicializacion de variables
 
@@ -63,10 +75,10 @@ void setup() {
 
   // Rellenamos las opciones del menú de la aplicación
   menux.addMenuOption( MenuOption( 1, "MODO MANUAL", 0, 2, "", 0));
-  menux.addMenuOption( MenuOption( 2, "Disp.: ", 1, 0, "STOP", 1));
+  menux.addMenuOption( MenuOption( 2, "Dispositivo:", 1, 0, "0", ACTION_ACTIVATE));
   menux.addMenuOption( MenuOption( 1, "MODO PROGRAMA", 0, 3, "", 0));
   menux.addMenuOption( MenuOption( 3, "No disponible 3", 1, 1, "", 0));
-  menux.addMenuOption( MenuOption( 1, "MODO CONFIGURACION", 0, 4, "", 0));
+  menux.addMenuOption( MenuOption( 1, "MODO CONFIG.", 0, 4, "", 0));
   menux.addMenuOption( MenuOption( 4, "No disponible 4", 1, 1, "", 0));
 
   // Definimos el código del menú inicial a mostrar
@@ -82,8 +94,8 @@ void setup() {
   Serial.println(KEYPAD_USER_KEY_MAP);
   int i, j;
   for (i = 0; i < KEYPAD_ROWS; i++) {
-    for (j = 0; i < KEYPAD_COLUMNS; j++) {
-      keys[i][j] = KEYPAD_USER_KEY_MAP.charAt( KEYPAD_COLUMNS * i + j); 
+    for (j = 0; j < KEYPAD_COLUMNS; j++) {
+      keys[i][j] = KEYPAD_USER_KEY_MAP.charAt( KEYPAD_ROWS * i + j); 
     }
   }
   // Creamos una instancia de la clase Keypad
@@ -98,33 +110,60 @@ void loop() {
   // Consultamos si se ha pulsado alguna tecla
   char key = keypad.waitForKey();
 //  char key = keypad.getKey();
-    Serial.println("key: " + key);
   if (key != 0) {
 	// Consultamos si se ha pulsado algún botón
 	if (isButtonBackRising(key)) {
 		goBackMenu();
                 menux.showMenuOption(lcd);
+                keypadBuffer = "";
 	} else if (isButtonOptionRising(key)) {
 		goNextOption();
                 menux.showMenuOption(lcd);
+                keypadBuffer = "";
 	} else if (isButtonSelectRising(key)) {
 		presentMenuOption = menux.getPresentMenuOption();
 		// Recibimos el valor de la opción validada o un valor vacío si se trata de navegación a submenú
-		optionValue = goSelectOption();
+                if (keypadBuffer != "" && presentMenuOption.getActionCode() != 0 ) {
+                  Serial.println(keypadBuffer.length());
+                  char temp[keypadBuffer.length()+1];
+                  keypadBuffer.toCharArray(temp,keypadBuffer.length()+1);
+  Serial.print("temp: ");
+                  Serial.println(temp);
+                  optionValue = temp;
+  Serial.print("optionValue: ");
+  Serial.println(optionValue);
+  Serial.print("optionValue2: ");
+  Serial.println(optionValue);
+                } else {
+                  optionValue = getSelectOptionValue();
+                }
+  Serial.print("optionValue3: ");
+  Serial.println(optionValue);
                 menux.showMenuOption(lcd);
+                keypadBuffer = "";
 
-		if (optionValue != 0) {
+		if (optionValue != "") {
 			doAction(presentMenuOption, optionValue);
 		}
-	}
+
+	} else {
+                keypadBuffer = keypadBuffer + key;
+		presentMenuOption = menux.getPresentMenuOption();
+                if (presentMenuOption.getActionCode() != 0) {
+                  menux.showMenuOption(lcd, keypadBuffer);
+                }
+        }
+    Serial.println(key);
+                
   }
 }
 
-void doAction(MenuOption menuOption, String value){
+void doAction(MenuOption menuOption, char* value){
 	switch (menuOption.getActionCode()) {
 		case ACTION_ACTIVATE:
 			// Ejecuta acciones para la Action ACTIVATE
 			Serial.println("Activando solenoide");
+			Serial.println(value);
 			break;
 		case ACTION_DEACTIVATE:
 			// Ejecuta acciones para la Action DEACTIVATE
@@ -145,8 +184,8 @@ void goNextOption() {
 	menux.goNextOption(menux.getPresentOption());
 }
 
-String goSelectOption() {
-	return menux.goSelectOption(menux.getPresentOption());
+char* getSelectOptionValue() {
+	return menux.getSelectOptionValue(menux.getPresentOption());
 }
 
 bool isButtonBackRising(char key) {
