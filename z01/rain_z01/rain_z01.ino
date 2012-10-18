@@ -51,7 +51,8 @@ en la memoria flash */
 // Inicializamos las variables del programa
 boolean showAction = false;
 byte activeMode = 0;
-char optionValue[4];
+char optionValue[4] = "";
+char* pOptionValue = &optionValue[0];
 MenuOption presentMenuOption;
 String keypadBuffer;
 
@@ -124,26 +125,16 @@ void loop() {
 		presentMenuOption = menux.getPresentMenuOption();
 		// Recibimos el valor de la opción validada o un valor vacío si se trata de navegación a submenú
                 if (keypadBuffer != "" && presentMenuOption.getActionCode() != 0 ) {
-                  Serial.println(keypadBuffer.length());
-                  char temp[keypadBuffer.length()+1];
-                  keypadBuffer.toCharArray(temp,keypadBuffer.length()+1);
-  Serial.print("temp: ");
-                  Serial.println(temp);
-                  optionValue = temp;
-  Serial.print("optionValue: ");
-  Serial.println(optionValue);
-  Serial.print("optionValue2: ");
-  Serial.println(optionValue);
+                  keypadBuffer.toCharArray(optionValue,keypadBuffer.length()+1);
+                  pOptionValue = &optionValue[0];
                 } else {
-                  optionValue = getSelectOptionValue();
+                  pOptionValue = getSelectOptionValue();
                 }
-  Serial.print("optionValue3: ");
-  Serial.println(optionValue);
                 menux.showMenuOption(lcd);
                 keypadBuffer = "";
 
 		if (optionValue != "") {
-			doAction(presentMenuOption, optionValue);
+			doAction(presentMenuOption, pOptionValue);
 		}
 
 	} else {
@@ -162,8 +153,8 @@ void doAction(MenuOption menuOption, char* value){
 	switch (menuOption.getActionCode()) {
 		case ACTION_ACTIVATE:
 			// Ejecuta acciones para la Action ACTIVATE
-			Serial.println("Activando solenoide");
-			Serial.println(value);
+			Serial.print("Activando solenoide: ");
+			Serial.println(*value);
 			break;
 		case ACTION_DEACTIVATE:
 			// Ejecuta acciones para la Action DEACTIVATE
