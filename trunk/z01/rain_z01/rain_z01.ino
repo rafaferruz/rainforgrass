@@ -44,6 +44,10 @@ en la memoria flash */
 #include <MenuOption.h>
 #include <Menux.h>
 
+// La clase Devices se usa para construir una coleccion de objetos Device 
+#include <Devices.h>
+#include <Device.h>
+
 
 // Se utiliza un fichero de configuración externo para aportar los estados iniciales.
 #include "constants.h"
@@ -52,9 +56,11 @@ en la memoria flash */
 boolean showAction = false;
 byte activeMode = 0;
 char optionValue[4] = "";
-char* pOptionValue = &optionValue[0];
 MenuOption presentMenuOption;
 String keypadBuffer;
+Device pDevices[MAX_NUM_DEVICES];
+Devices devices = Devices(pDevices, MAX_NUM_DEVICES);
+
 
 LiquidCrystal lcd(LCD_REGISTER_SELECT, LCD_ENABLE, LCD_DB4, LCD_DB5, LCD_DB6, LCD_DB7);
 
@@ -70,13 +76,13 @@ Keypad keypad = Keypad( makeKeymap( keys), KEYPAD_ROW_PINS, KEYPAD_COL_PINS, KEY
 
 void setup() {
   Serial.begin(SERIAL_SPEED);
-  Serial.println(SERIAL_SPEED);
+  Serial.println("Setup");
   // se definen el número de columnas y filas del LCD
   lcd.begin(LCD_COLUMNS, LCD_ROWS);
 
   // Rellenamos las opciones del menú de la aplicación
   menux.addMenuOption( MenuOption( 1, "MODO MANUAL", 0, 2, "", 0));
-  menux.addMenuOption( MenuOption( 2, "Dispositivo:", 1, 0, "0", ACTION_ACTIVATE));
+  menux.addMenuOption( MenuOption( 2, "Dispositivo:", 1, 0, "0", ACTION_ON_OFF));
   menux.addMenuOption( MenuOption( 1, "MODO PROGRAMA", 0, 3, "", 0));
   menux.addMenuOption( MenuOption( 3, "No disponible 3", 1, 1, "", 0));
   menux.addMenuOption( MenuOption( 1, "MODO CONFIG.", 0, 4, "", 0));
@@ -90,9 +96,6 @@ void setup() {
   menux.showMenuOption(lcd);
   
   // Inicializacin del keypad
-  Serial.println(KEYPAD_ROWS);
-  Serial.println(KEYPAD_COLUMNS);
-  Serial.println(KEYPAD_USER_KEY_MAP);
   int i, j;
   for (i = 0; i < KEYPAD_ROWS; i++) {
     for (j = 0; j < KEYPAD_COLUMNS; j++) {
@@ -100,7 +103,14 @@ void setup() {
     }
   }
   // Creamos una instancia de la clase Keypad
-  keypad.begin( makeKeymap( keys));  
+  keypad.begin( makeKeymap( keys)); 
+ 
+  // Inicializamos los dispositivos
+  Serial.println("Dispositivos");
+  devices.addDevice( 1, 1); 
+  devices.addDevice( 2, 1); 
+  devices.addDevice( 3, 1); 
+  devices.addDevice( 4, 1); 
 
 }
 
@@ -126,15 +136,17 @@ void loop() {
 		// Recibimos el valor de la opción validada o un valor vacío si se trata de navegación a submenú
                 if (keypadBuffer != "" && presentMenuOption.getActionCode() != 0 ) {
                   keypadBuffer.toCharArray(optionValue,keypadBuffer.length()+1);
-                  pOptionValue = &optionValue[0];
                 } else {
-                  pOptionValue = getSelectOptionValue();
+                //  optionValue = getSelectOptionValue();
+                strcpy(optionValue, getSelectOptionValue());
                 }
                 menux.showMenuOption(lcd);
                 keypadBuffer = "";
 
 		if (optionValue != "") {
-			doAction(presentMenuOption, pOptionValue);
+                  Serial.print("optionValue: ");
+                  Serial.println(int(optionValue));
+			doAction(presentMenuOption, optionValue);
 		}
 
 	} else {
@@ -150,18 +162,59 @@ void loop() {
 }
 
 void doAction(MenuOption menuOption, char* value){
+                        int idx = 0;
 	switch (menuOption.getActionCode()) {
 		case ACTION_ACTIVATE:
 			// Ejecuta acciones para la Action ACTIVATE
-			Serial.print("Activando solenoide: ");
-			Serial.println(*value);
+                        if (devices.activateById(int(value)) == true ) {
+                                                lcd.setCursor(0,0);
+                                                lcd.print("MM_ACT_");
+                        			lcd.println(*value);
+                        } else {
+                                                lcd.setCursor(0,0);
+                                                lcd.print("ERROR_DISP_");
+                        			lcd.println(*value);
+                        }
 			break;
 		case ACTION_DEACTIVATE:
 			// Ejecuta acciones para la Action DEACTIVATE
-			Serial.println("Desactivando solenoide");
+                        if (devices.deactivateById(int(value)) == true ) {
+                                                lcd.setCursor(0,0);
+                                                lcd.print("MM_DACT_");
+                        			lcd.println(*value);
+                        } else {
+                                                lcd.setCursor(0,0);
+                                                lcd.print("ERROR_DISP_");
+                        			lcd.println(*value);
+                        }
+			break;
+		case ACTION_ON_OFF:
+			// Ejecuta acciones para la Action ON_OFF
+                  Serial.print("value: ");
+                  Serial.println(int(*value)-48);
+                        idx = devices.getDeviceIndex(int(*value)-48);
+                  Serial.print("idx: ");
+                  Serial.println(idx);
+                        if (idx >= 0 ) {
+                            if (devices.getDevice(idx).getStatus() == 0 ) {
+                                devices.getDevice(idx).activate();
+                                lcd.setCursor(0,0);
+                                lcd.print("MM_ACT_");
+                        	lcd.println(*value);
+                            } else {
+                                devices.getDevice(idx).deactivate();
+                                lcd.setCursor(0,0);
+                                lcd.print("MM_DACT_");
+                            	lcd.println(*value);
+                            }
+                        } else {
+                            lcd.setCursor(0,0);
+                            lcd.print("ERROR_DISP_");
+                            lcd.println(*value);
+                        }
 			break;
 		default:
-			// Ejecuta acciones cuando no se ha definido una Action definida
+			// Ejecuta otras acciones cuando no se ha definido una Action definida
 			break;
 	}
 
@@ -189,4 +242,11 @@ bool isButtonOptionRising(char key) {
 
 bool isButtonSelectRising(char key) {
   return key == 'D';
+}
+
+void deactivateDevice(char* device) {
+  // deactivate action del dispositivo
+}
+
+void deactivateAllDevices() {
 }

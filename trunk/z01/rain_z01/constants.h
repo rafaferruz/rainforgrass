@@ -24,6 +24,7 @@ String KEYPAD_USER_KEY_MAP = "123A456B789C*0#D";
 // Definiciones de acciones a ejecutar. El número entero es el que debe codificarse en el campo actionCode de MenuOption.
 const byte ACTION_ACTIVATE = 1;
 const byte ACTION_DEACTIVATE = 2;
+const byte ACTION_ON_OFF = 3;
 
 // Definición de parámetros de comunicaciones Serial
 const unsigned long SERIAL_SPEED = 9600;
@@ -39,3 +40,6 @@ const String MENU_MAIN_TITLE = "RAIN_Z01";
 const byte MANUAL_MODE = 1;
 const byte PROGRAM_MODE = 2;
 const byte CONFIGURATION_MODE = 3;
+
+// Variables de configuracin de dispositivos
+const int MAX_NUM_DEVICES = 4;  // Mximo nmero de dispositivos que se pueden usar
