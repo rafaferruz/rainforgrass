@@ -11,14 +11,15 @@ public:
 	void initialize(int id, int  net);
 	int getDeviceId() ;
 	int getNetCode() ;
-	byte getStatus() ;
+	int getState() ;
 	bool deactivate();
 	bool activate();
 
 private:
 	int deviceId;
 	int netCode;
-	byte status;	// 0 = No activated; 1 = Activated;
+	int state;	// 0 = No activated; 1 = Activated;
+
 };
  
 #endif

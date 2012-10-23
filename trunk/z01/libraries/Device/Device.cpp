@@ -19,20 +19,18 @@ int Device::getNetCode(){
 	return this->netCode;
 }
 
-byte Device::getStatus(){
-	return this->status;
+int Device::getState(){
+	return this->state;
 }
 
 bool Device::deactivate(){
-	this->status = 0;
+	this->state = 0;
 	// Operaciones de desactivación del dispositivo
 	return true;
 }
 
 bool Device::activate(){
-	this->status = 1;
-Serial.print("Activado disp. ");
-Serial.println(this->getDeviceId());
+	this->state = 1;
 	// Operaciones de activación del dispositivo
 	return true;
 }

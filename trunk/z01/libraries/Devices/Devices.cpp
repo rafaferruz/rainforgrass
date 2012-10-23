@@ -10,20 +10,13 @@ Devices::Devices(Device* pDevices, int numDevices) {
 	Devuelve true si consigue añadir el dispositivo a la lista y false si la lista está llena y no lo puede añadir.
 */ 
 bool Devices::addDevice(int id, int net){
-Serial.print("addDevice ");
-Serial.println(id);
 	// Comprobamos que no exista ya el 'id' en la lista
 	if ( this->getDeviceIndex( id ) > -1 ) {
 		return false;
 	}
 	int i = 0;
-Serial.println("Añadiendo dispositivo");
 	for (i = 0; i < numDevices; i++) {
 		if ( pDevices[i].getDeviceId() == -1) {
-Serial.print("i: ");
-Serial.print(i);
-Serial.print(" - ");
-Serial.println(id);
 			pDevices[i].initialize( id, net);
 			return true;
 		}
@@ -32,20 +25,15 @@ Serial.println(id);
 }
 
 /*
-	Devuelve true si consigue eliminar el dispositivo de la lista y false no lo puede eliminar porque no lo encuentra en la lista.
+	Devuelve true si consigue eliminar el dispositivo de la lista y false si no lo puede eliminar porque no lo encuentra en la lista.
 */ 
 bool Devices::removeDevice(Device device){
-	Device* pTemp = pDevices;
 	int i = 0;
 	for (i = 0; i < numDevices; i++) {
-		if (pTemp != NULL) {
-			if ( (*pTemp).getDeviceId() == device.getDeviceId() ) {
-				delete pTemp; 
-				pTemp = NULL;
-				return true;
-			}
+		if ( pDevices[i].getDeviceId() == device.getDeviceId() ) {
+			pDevices[i].initialize( -1, -1); 
+			return true;
 		}
-		pTemp++;
 	}
 	return false;
 }
@@ -53,26 +41,20 @@ bool Devices::removeDevice(Device device){
 /*
 	Devuelve el dispositivo que se encuentra en la posición indicada por el índice que se pasa como parámetro.
 */ 
-Device Devices::getDevice(byte index){
+Device* Devices::getDevice(byte index){
 /*	if ( index > numDevices ) {
 		return NULL;
 	}*/
-	Device* pTemp = pDevices;
-	int i = 0;
-	for (i = 0; i < index; i++) {
-		pTemp++;
-	}
-	return *pTemp;
+	return pDevices + index;
 }
 
 /*
 	Devuelve el índice que ocupa el dispositivo cuyo id es igual al pasado como parámetro.
 */ 
 int Devices::getDeviceIndex(int id){
-	Device* pTemp = pDevices;
 	int i = 0;
 	for (i = 0; i < numDevices; i++) {
-		if (pTemp[i].getDeviceId() == id) {
+		if (pDevices[i].getDeviceId() == id) {
 			return i;
 		}
 	}
@@ -83,13 +65,11 @@ int Devices::getDeviceIndex(int id){
 	Desactiva todos los dispositivos.
 */ 
 bool Devices::deactivateAll(){
-	Device* pTemp = pDevices;
 	int i = 0;
 	for (i = 0; i < numDevices; i++) {
-		if (pTemp != NULL) {
-			(*pTemp).deactivate();
+		if (pDevices[i].getDeviceId() >= 0) {
+			pDevices[i].deactivate();
 		}
-		pTemp++;
 	}
 	return true;
 }
@@ -98,14 +78,12 @@ bool Devices::deactivateAll(){
 	Desactiva el dispositivo cuyo id sea igual al pasado como parámetro.
 */ 
 bool Devices::deactivateById(int id){
-	Device* pTemp = pDevices;
 	int i = 0;
 	for (i = 0; i < numDevices; i++) {
-		if ((*pTemp).getDeviceId() == id) {
-			(*pTemp).deactivate();
+		if (pDevices[i].getDeviceId() == id) {
+			pDevices[i].deactivate();
 			return true;
 		}
-		pTemp++;
 	}
 	return false;
 }
@@ -117,14 +95,12 @@ bool Devices::activateById(int id){
 	// Desactivación general de todos los dispositivos
 	deactivateAll();
 	// Activación del dispositivo indicado
-	Device* pTemp = pDevices;
 	int i = 0;
 	for (i = 0; i < numDevices; i++) {
-		if ((*pTemp).getDeviceId() == id) {
-			(*pTemp).activate();
+		if (pDevices[i].getDeviceId() == id) {
+			pDevices[i].activate();
 			return true;
 		}
-		pTemp++;
 	}
 	return false;
 }
