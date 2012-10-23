@@ -76,7 +76,6 @@ Keypad keypad = Keypad( makeKeymap( keys), KEYPAD_ROW_PINS, KEYPAD_COL_PINS, KEY
 
 void setup() {
   Serial.begin(SERIAL_SPEED);
-  Serial.println("Setup");
   // se definen el número de columnas y filas del LCD
   lcd.begin(LCD_COLUMNS, LCD_ROWS);
 
@@ -106,7 +105,6 @@ void setup() {
   keypad.begin( makeKeymap( keys)); 
  
   // Inicializamos los dispositivos
-  Serial.println("Dispositivos");
   devices.addDevice( 1, 1); 
   devices.addDevice( 2, 1); 
   devices.addDevice( 3, 1); 
@@ -123,7 +121,12 @@ void loop() {
 //  char key = keypad.getKey();
   if (key != 0) {
 	// Consultamos si se ha pulsado algún botón
-	if (isButtonBackRising(key)) {
+	if (isButtonCancellation(key)) {
+                devices.deactivateAll();
+                menux.showMenuOption(lcd);
+                keypadBuffer = "";
+	} else if (isButtonBackRising(key)) {
+                devices.deactivateAll();
 		goBackMenu();
                 menux.showMenuOption(lcd);
                 keypadBuffer = "";
@@ -137,15 +140,12 @@ void loop() {
                 if (keypadBuffer != "" && presentMenuOption.getActionCode() != 0 ) {
                   keypadBuffer.toCharArray(optionValue,keypadBuffer.length()+1);
                 } else {
-                //  optionValue = getSelectOptionValue();
-                strcpy(optionValue, getSelectOptionValue());
+                  strcpy(optionValue, getSelectOptionValue());
                 }
                 menux.showMenuOption(lcd);
                 keypadBuffer = "";
 
 		if (optionValue != "") {
-                  Serial.print("optionValue: ");
-                  Serial.println(int(optionValue));
 			doAction(presentMenuOption, optionValue);
 		}
 
@@ -156,61 +156,42 @@ void loop() {
                   menux.showMenuOption(lcd, keypadBuffer);
                 }
         }
-    Serial.println(key);
                 
   }
 }
 
 void doAction(MenuOption menuOption, char* value){
-                        int idx = 0;
+        int idxDevice = 0;
 	switch (menuOption.getActionCode()) {
 		case ACTION_ACTIVATE:
 			// Ejecuta acciones para la Action ACTIVATE
-                        if (devices.activateById(int(value)) == true ) {
-                                                lcd.setCursor(0,0);
-                                                lcd.print("MM_ACT_");
-                        			lcd.println(*value);
+                        if (devices.activateById(atoi(value)) == true ) {
+                          sendMessage(lcd, 0, 0, "MM_ACT_", value);
                         } else {
-                                                lcd.setCursor(0,0);
-                                                lcd.print("ERROR_DISP_");
-                        			lcd.println(*value);
+                          sendMessage(lcd, 0, 0, "ERROR_DISP_", value);
                         }
 			break;
 		case ACTION_DEACTIVATE:
 			// Ejecuta acciones para la Action DEACTIVATE
-                        if (devices.deactivateById(int(value)) == true ) {
-                                                lcd.setCursor(0,0);
-                                                lcd.print("MM_DACT_");
-                        			lcd.println(*value);
+                        if (devices.deactivateById(atoi(value)) == true ) {
+                          sendMessage(lcd, 0, 0, "MM_DACT_", value);
                         } else {
-                                                lcd.setCursor(0,0);
-                                                lcd.print("ERROR_DISP_");
-                        			lcd.println(*value);
+                          sendMessage(lcd, 0, 0, "ERROR_DISP_", value);
                         }
 			break;
 		case ACTION_ON_OFF:
 			// Ejecuta acciones para la Action ON_OFF
-                  Serial.print("value: ");
-                  Serial.println(int(*value)-48);
-                        idx = devices.getDeviceIndex(int(*value)-48);
-                  Serial.print("idx: ");
-                  Serial.println(idx);
-                        if (idx >= 0 ) {
-                            if (devices.getDevice(idx).getStatus() == 0 ) {
-                                devices.getDevice(idx).activate();
-                                lcd.setCursor(0,0);
-                                lcd.print("MM_ACT_");
-                        	lcd.println(*value);
+                        idxDevice = devices.getDeviceIndex(atoi(value));
+                        if (idxDevice >= 0 ) {
+                            if ((*(devices.getDevice(idxDevice))).getState() == 0 ) {
+                                devices.activateById(atoi(value));
+                                sendMessage(lcd, 0, 0, "MM_ACT_", value);
                             } else {
-                                devices.getDevice(idx).deactivate();
-                                lcd.setCursor(0,0);
-                                lcd.print("MM_DACT_");
-                            	lcd.println(*value);
+                                devices.deactivateById(atoi(value));
+                                sendMessage(lcd, 0, 0, "MM_DACT_", value);
                             }
                         } else {
-                            lcd.setCursor(0,0);
-                            lcd.print("ERROR_DISP_");
-                            lcd.println(*value);
+                          sendMessage(lcd, 0, 0, "ERROR_DISP_", value);
                         }
 			break;
 		default:
@@ -232,6 +213,10 @@ char* getSelectOptionValue() {
 	return menux.getSelectOptionValue(menux.getPresentOption());
 }
 
+bool isButtonCancellation(char key) {
+  return key == '*';
+}
+
 bool isButtonBackRising(char key) {
   return key == '#';
 }
@@ -250,3 +235,13 @@ void deactivateDevice(char* device) {
 
 void deactivateAllDevices() {
 }
+
+/*
+  Enva un mensaje a un dispositivo LiquidCrystal colocandolo a partir de la fila y columna indicada en los parmetros
+  y concatenando las cadenas messageCode y value.
+*/
+void sendMessage(LiquidCrystal lcd, int column, int row, String messageCode, char* value) {
+  lcd.setCursor( column, row);
+  messageCode.concat(value);
+  lcd.print(messageCode);
+} 
