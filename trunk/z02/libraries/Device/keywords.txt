@@ -1,0 +1,28 @@
+#######################################
+# Syntax Coloring Map For Debounce
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+Device	 KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+getDeviceId	KEYWORD2
+getNetCode	KEYWORD2
+getStatus	KEYWORD2
+deactivate	KEYWORD2
+activate	KEYWORD2
+
+#######################################
+# Instances (KEYWORD2)
+#######################################
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
