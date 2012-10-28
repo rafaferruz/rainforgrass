@@ -1,11 +1,11 @@
 /*
-rain_z01
+rain_z02
  
  Proyecto para automatización de sistemas de riegos.
  
  Fase 1: Activación de una electroválvula controlada por una placa Arduino Uno.
  
- Descripción de la Fase 1:
+ Descripción de la Fase 1 (rain_z00) :
  
  	- Aunque el objetivo de esta fase consista en la activación y desactivación del solenoide de una electroválvula
           de riego, el desarrollo del software fue derivando hacia la presentacin sobre un display LCD de 2 filas por
@@ -16,7 +16,7 @@ rain_z01
  
  Fase 2: Introducción del uso de un teclado de 16 teclas para la entrada de órdenes y valores de datos.
  
- Descripción de la Fase 2:
+ Descripción de la Fase 2 (rain_z01) :
  
  	- Se pretende el uso de un teclado de 16 teclas para la entrada de órdenes de ejecución y valores de datos 
           de configuración. 
@@ -26,6 +26,19 @@ rain_z01
           número entre 1 y 4 el dispositivo que debería ser activado en el supuesto de que se conectasen hasta cuatro 
           dispositivos el circuito. 
           El software de control de la activación de los dispositivos no será desarrollado en esta fase.
+          
+ 
+ Fase 3: Incorporacion de comunicaciones entre controlador central y dispositivos.
+ 
+ Descripción de la Fase 3 (rain_z02) :
+ 
+ 	- Se incorparan las comunicaciones desde el controlador central hasta los dispositivos a controlar. Esta 
+          comunicacion se hace unidireccional para simplificar las pruebas. Tampoco se acomete la realizacion de los
+          dispositivos receptores por lo que no ser posible verificar realmente el envio-recepcion de los paquetes de 
+          datos, quedando para fases posteriores.
+          Para la gestion de las comunicaciones se usara la libreria VirtualWire.
+          En esta fase debera quedar definida la primera version del protocolo de envio y control de paquetes RainZ.
+          
  */
 
 /* La libreria <pgmspace.h> proporciona las herramientas necesarias para manipular las variables de datos
@@ -48,6 +61,14 @@ en la memoria flash */
 #include <Devices.h>
 #include <Device.h>
 
+/* La librera VirtualWire proporciona soporte para las comunicaciones entre el controlador central y los dispositivos a 
+controlar */
+#include <VirtualWire.h>
+/* La librera RainPComm implementa un protocolo propio para la transmisiones de la aplicacion */
+#include <RainPComm.h>
+
+
+
 
 // Se utiliza un fichero de configuración externo para aportar los estados iniciales.
 #include "constants.h"
@@ -55,11 +76,12 @@ en la memoria flash */
 // Inicializamos las variables del programa
 boolean showAction = false;
 byte activeMode = 0;
-char optionValue[4] = "";
+char optionValue[MAX_KEYPAD_ENTRY + 1] = "";
 MenuOption presentMenuOption;
 String keypadBuffer;
 Device pDevices[MAX_NUM_DEVICES];
 Devices devices = Devices(pDevices, MAX_NUM_DEVICES);
+RainPComm rainPComm = RainPComm( TX_PIN, RC_PIN, SPEED_COMM, TARGET_NET, SOURCE_DEV);
 
 
 LiquidCrystal lcd(LCD_REGISTER_SELECT, LCD_ENABLE, LCD_DB4, LCD_DB5, LCD_DB6, LCD_DB7);
@@ -150,7 +172,9 @@ void loop() {
 		}
 
 	} else {
-                keypadBuffer = keypadBuffer + key;
+                if (keypadBuffer.length() < MAX_KEYPAD_ENTRY) {
+                  keypadBuffer = keypadBuffer + key;
+                }
 		presentMenuOption = menux.getPresentMenuOption();
                 if (presentMenuOption.getActionCode() != 0) {
                   menux.showMenuOption(lcd, keypadBuffer);
