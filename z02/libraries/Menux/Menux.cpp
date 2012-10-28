@@ -2,9 +2,9 @@
 #include "MenuOption.h"
 #include "Menux.h"
  
-Menux::Menux() {
- this->lastOption = 0;
-}
+Menux::Menux() :
+	lastOption(0)
+{ }
 
 void Menux::addMenuOption(MenuOption menuOption) {
 	menuOptionList[lastOption] = menuOption;

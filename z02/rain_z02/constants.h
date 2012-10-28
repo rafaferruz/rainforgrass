@@ -1,7 +1,7 @@
 /*
 constants.h
 
-Constantes utilizadas en el proyecto RAIN_Z01.
+Constantes utilizadas en el proyecto RAIN_Z02.
 */
 
 // Definición de pines para uso del display LCD
@@ -20,6 +20,7 @@ const byte KEYPAD_ROWS = 4;
 byte KEYPAD_ROW_PINS[KEYPAD_ROWS] = { 9, 8, 7, 6 };
 byte KEYPAD_COL_PINS[KEYPAD_COLUMNS] = { 5, 4, 3, 2 };
 String KEYPAD_USER_KEY_MAP = "123A456B789C*0#D";
+const byte MAX_KEYPAD_ENTRY = 3;
 
 // Definiciones de acciones a ejecutar. El número entero es el que debe codificarse en el campo actionCode de MenuOption.
 const byte ACTION_ACTIVATE = 1;
@@ -43,3 +44,10 @@ const byte CONFIGURATION_MODE = 3;
 
 // Variables de configuracin de dispositivos
 const int MAX_NUM_DEVICES = 4;  // Mximo nmero de dispositivos que se pueden usar
+
+// Variables de control de comunicaciones por VirtualWire
+const byte TX_PIN = 13;
+const byte RC_PIN = 12;
+const unsigned long SPEED_COMM = 9600;
+const unsigned long TARGET_NET = 11111;
+const unsigned int SOURCE_DEV = 111;

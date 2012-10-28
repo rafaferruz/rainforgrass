@@ -1,10 +1,11 @@
 #include "Arduino.h"
 #include "Device.h"
  
-Device::Device() {
-	this->deviceId = -1 ;
-	this->netCode = -1 ;
-}
+Device::Device() :
+	deviceId( -1 ),
+	netCode( -1 ),
+	state(0)
+{ }
 
 void Device::initialize(int id, int  net) {
 	this->deviceId = id ;
@@ -19,7 +20,7 @@ int Device::getNetCode(){
 	return this->netCode;
 }
 
-int Device::getState(){
+byte Device::getState(){
 	return this->state;
 }
 
