@@ -1,5 +1,6 @@
 #include "Arduino.h"
 #include "Devices.h"
+#include "RainPComm.h"
  
 Devices::Devices(Device* pDevices, int numDevices) {
 	this->pDevices = pDevices;
@@ -9,7 +10,7 @@ Devices::Devices(Device* pDevices, int numDevices) {
 /*
 	Devuelve true si consigue añadir el dispositivo a la lista y false si la lista está llena y no lo puede añadir.
 */ 
-bool Devices::addDevice(int id, int net){
+bool Devices::addDevice(int id, int net, RainPComm * rp){
 	// Comprobamos que no exista ya el 'id' en la lista
 	if ( this->getDeviceIndex( id ) > -1 ) {
 		return false;
@@ -17,7 +18,7 @@ bool Devices::addDevice(int id, int net){
 	int i = 0;
 	for (i = 0; i < numDevices; i++) {
 		if ( pDevices[i].getDeviceId() == -1) {
-			pDevices[i].initialize( id, net);
+			pDevices[i].initialize( id, net, rp);
 			return true;
 		}
 	}

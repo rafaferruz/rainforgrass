@@ -17,16 +17,31 @@ RainPComm::RainPComm(byte txPin, byte rcPin, unsigned int speedComm, unsigned lo
 	blockCounter(0)
 	{ }
 
-bool RainPComm::sendMessage(unsigned int targetDev, char* command){
+bool RainPComm::sendMessage(int targetDev, char* command){
 	String completeMsg = "";
+	unsigned int startPosition = 0;
 	char partOfMsg[VW_MAX_PAYLOAD];
 	if ( !isRightTxComm() ){
 		return false;
 	}
-	completeMsg = addCheckBlock(prepareMessage(targetDev, command));
-	// Llamada a la librería VirtualWire para transmisión de un paquete
-	completeMsg.toCharArray(partOfMsg,VM_MAX_PAYLOAD);
-	return vw_send( (uint8_t*)partOfMsg, completeMsg.length());
+	completeMsg = prepareAddressBlock(targetDev);
+	completeMsg.toCharArray(partOfMsg, completeMsg.length()+1);
+	// Llamada a la librería VirtualWire para transmisión del paquete de direcciones
+Serial.println(completeMsg);
+Serial.println(partOfMsg);
+	if ( vw_send( (uint8_t*)partOfMsg, completeMsg.length()) == false) {
+		return false;
+	}
+	completeMsg = preparePayloadBlock(command);
+	completeMsg.toCharArray(partOfMsg, completeMsg.length()+1);
+	// Llamada a la librería VirtualWire para transmisión del paquete de direcciones
+Serial.println(completeMsg);
+Serial.println(partOfMsg);
+	if ( vw_send( (uint8_t*)partOfMsg, completeMsg.length()) == false) {
+		return false;
+	}
+Serial.println("Envío finalizado");
+	return true;
 }
 
 void RainPComm::setTargetNet(unsigned long targetNet){
@@ -43,6 +58,7 @@ bool RainPComm::isRightTxComm(){
 			//  Llamada a la librería VirtualWire para setup de Comm y activación del transmiter
 			vw_set_tx_pin( txPin );
 			vw_setup( speedComm );
+Serial.println("Setting up VirtualWire");
 		} else {
 			return false;
 		}
@@ -50,8 +66,17 @@ bool RainPComm::isRightTxComm(){
 	return true;
 }
 
-String RainPComm::prepareMessage(unsigned int targetDev, char* command){
+String RainPComm::prepareAddressBlock(unsigned int targetDev){
 	String message = "#";
+	// Incluimos el número de bloque
+	if (blockCounter > 64000) {
+		blockCounter = 0;
+	}
+	message.concat(++blockCounter);
+	message.concat("#");
+	// Incluimos el tipo de bloque (A)ddress
+	message.concat("A");
+	message.concat("#");
 	// Incluimos la Red de Destino
 	message.concat(targetNet);
 	message.concat("#");
@@ -61,11 +86,16 @@ String RainPComm::prepareMessage(unsigned int targetDev, char* command){
 	// Incluimos la Dispositivo de Origen
 	message.concat(sourceDev);
 	message.concat("#");
-	// Incluimos la Red de Destino
-	message.concat(targetNet);
-	message.concat("#");
+	return message;
+}
+
+String RainPComm::preparePayloadBlock(char* command){
+	String message = "#";
 	// Incluimos el número de bloque
 	message.concat(++blockCounter);
+	message.concat("#");
+	// Incluimos el tipo de bloque (P)ayload
+	message.concat("P");
 	message.concat("#");
 	// Incluimos texto de Comando
 	message.concat(command);
@@ -73,8 +103,3 @@ String RainPComm::prepareMessage(unsigned int targetDev, char* command){
 	return message;
 }
 
-String RainPComm::addCheckBlock(String message){
-	message.concat("ABCD");
-	message.concat("#");
-	return message;
-}

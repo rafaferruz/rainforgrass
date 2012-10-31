@@ -6,17 +6,18 @@
 # Datatypes (KEYWORD1)
 #######################################
 
-Device	 KEYWORD1
+RainPComm	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
 
-getDeviceId	KEYWORD2
-getNetCode	KEYWORD2
-getStatus	KEYWORD2
-deactivate	KEYWORD2
-activate	KEYWORD2
+sendMessage	KEYWORD2
+setTargetNet	KEYWORD2
+setSourceDev	KEYWORD2
+isRightTxComm	KEYWORD2
+prepareAddressBlock	KEYWORD2
+preparePayloadBlock	KEYWORD2
 
 #######################################
 # Instances (KEYWORD2)

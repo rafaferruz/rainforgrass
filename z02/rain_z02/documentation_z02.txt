@@ -87,13 +87,20 @@ y que determina la estructura de los paquetes de información enviada, incluyend
 PROTOCOLO DE COMUNICACIONES RainP
 =================================
 
-	El protocolo RainP define la estructura de los paquetes de datos a transmitir entre dispositivos de una misma red funcionando bajo el control de una aplicación RainZ. Cada paquete de datos deberá constar de los siguientes datos:
+	El protocolo RainP define la estructura de los paquetes de datos a transmitir entre dispositivos de una misma red funcionando bajo el control de una aplicación RainZ. Cada envío de datos se realiza construyendo dos bloques de información que se enviarán independientemente pero uno detrás de otro, cuidando que el contador de bloque que se incluye en cada bloque tengan una numeración correlativa. Estos dos paquetes de información se definen como Bloque de Direcciones (AddressBlock) y Bloque de Comando (PayloadBlock) deberá constar de los siguientes datos:
 
+	La estructura del Bloque de Direcciones es la siguiente:
+
+	Número de paquete		Número entero largo entre 1 y 16.000.000
+	Tipo de paquete			Siempre "A" (Addresses)
 	Red de destino			Número entero largo entre 1 y 16.000.000
 	Dispositivo de destino		Número entero entre 1 y 65332.
 	Dispositivo de origen		Número entero entre 1 y 65332.
-	Número de paquete		Número entero largo entre 1 y 16.000.000
-	Comando de ejecución		Número entero entre 1 y 65332, según la tabla de comandos de la aplicación RainZ.
-	Dígitos de comprobación		Texto de 4 caracteres para indicar los dígitos de control de la información 							enviada.
 
-	Cada dato irá separado del siguiente por un caracter '#'. Además, cada paquete deberá comenzar y finalizar con el mismo caracter '#'.
+	La estructura del Bloque de Comando es la siguiente:
+
+	Número de paquete		Número entero largo entre 1 y 16.000.000.
+	Tipo de paquete			Siempre "P" (Payload)
+	Comando de ejecución		Número entero entre 1 y 65332, según la tabla de comandos de la aplicación RainZ.
+
+	Dentro de cada paquete cada dato irá separado del siguiente por un caracter '#'. Además, cada paquete deberá comenzar y finalizar con el mismo caracter '#'.
