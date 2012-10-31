@@ -34,7 +34,7 @@ rain_z02
  
  	- Se incorparan las comunicaciones desde el controlador central hasta los dispositivos a controlar. Esta 
           comunicacion se hace unidireccional para simplificar las pruebas. Tampoco se acomete la realizacion de los
-          dispositivos receptores por lo que no ser posible verificar realmente el envio-recepcion de los paquetes de 
+          dispositivos receptores por lo que no va a ser posible verificar realmente el envio-recepcion de los paquetes de 
           datos, quedando para fases posteriores.
           Para la gestion de las comunicaciones se usara la libreria VirtualWire.
           En esta fase debera quedar definida la primera version del protocolo de envio y control de paquetes RainZ.
@@ -127,10 +127,10 @@ void setup() {
   keypad.begin( makeKeymap( keys)); 
  
   // Inicializamos los dispositivos
-  devices.addDevice( 1, 1); 
-  devices.addDevice( 2, 1); 
-  devices.addDevice( 3, 1); 
-  devices.addDevice( 4, 1); 
+  devices.addDevice( 1, TARGET_NET, &rainPComm); 
+  devices.addDevice( 2, TARGET_NET, &rainPComm); 
+  devices.addDevice( 3, TARGET_NET, &rainPComm); 
+  devices.addDevice( 4, TARGET_NET, &rainPComm); 
 
 }
 

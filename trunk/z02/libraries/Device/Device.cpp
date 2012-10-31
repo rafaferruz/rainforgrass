@@ -12,6 +12,12 @@ void Device::initialize(int id, int  net) {
 	this->netCode = net ;
 }
 
+void Device::initialize(int id, int  net, RainPComm * rp) {
+	this->deviceId = id ;
+	this->netCode = net ;
+	this->rp = rp ;
+}
+
 int Device::getDeviceId(){
 	return this->deviceId;
 }
@@ -33,6 +39,9 @@ bool Device::deactivate(){
 bool Device::activate(){
 	this->state = 1;
 	// Operaciones de activación del dispositivo
+	char command[] = "DO_ACTIVATION";
+Serial.println(command);
+	(*rp).sendMessage(this->deviceId, command);
 	return true;
 }
 

@@ -12,9 +12,10 @@ Device	 KEYWORD1
 # Methods and Functions (KEYWORD2)
 #######################################
 
+initialize	KEYWORD2
 getDeviceId	KEYWORD2
 getNetCode	KEYWORD2
-getStatus	KEYWORD2
+getState	KEYWORD2
 deactivate	KEYWORD2
 activate	KEYWORD2
 

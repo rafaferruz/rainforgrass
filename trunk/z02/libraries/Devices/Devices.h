@@ -7,7 +7,7 @@
 class Devices {
 public:
 	Devices(Device* pDevices, int numDevices) ;
-	bool addDevice(int id, int net);
+	bool addDevice(int id, int net, RainPComm * rp);
 	bool removeDevice(Device device);
 	Device* getDevice(byte index);
 	int getDeviceIndex(int id);
