@@ -48,6 +48,6 @@ const int MAX_NUM_DEVICES = 4;  // Mximo nmero de dispositivos que se pueden usa
 // Variables de control de comunicaciones por VirtualWire
 const byte TX_PIN = 13;
 const byte RC_PIN = 12;
-const unsigned long SPEED_COMM = 9600;
+const unsigned long SPEED_COMM = 2000;
 const unsigned long TARGET_NET = 11111;
 const unsigned int SOURCE_DEV = 111;
