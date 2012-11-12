@@ -29,7 +29,7 @@ bool RainPComm::sendMessage(int targetDev, char* command){
 	// Llamada a la librería VirtualWire para transmisión del paquete de direcciones
 Serial.println(completeMsg);
 Serial.println(partOfMsg);
-	if ( vw_send( (uint8_t*)partOfMsg, completeMsg.length()) == false) {
+	if ( vw_send( (uint8_t*)partOfMsg, (uint8_t)completeMsg.length()) == false) {
 		return false;
 	}
 	completeMsg = preparePayloadBlock(command);
