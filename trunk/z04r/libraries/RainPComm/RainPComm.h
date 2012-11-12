@@ -1,0 +1,34 @@
+#ifndef RainPComm_h
+#define RainPComm_h
+
+#include "Arduino.h"
+#include "VirtualWire.h"
+
+class RainPComm {
+public:
+	RainPComm(byte txPin, byte rxPin, unsigned int speedComm);
+	RainPComm(byte txPin, byte rxPin, unsigned int speedComm, unsigned long targetNet, unsigned int sourceDev);
+	bool sendMessage(int targetDev, char* command);
+	void setTargetNet(unsigned long targetNet);
+	void setSourceDev(unsigned int sourceDev);
+	String getMessage();
+ 
+private:
+
+	byte txPin;
+	byte rxPin;
+	unsigned int speedComm;
+	unsigned long targetNet;
+	unsigned int sourceDev;
+	int targetDev;
+	unsigned long blockCounter;
+	byte stateTxComm;	// Transmitter: 0 = Comm desactivada; 1 = Comm activada
+	byte stateRxComm;	// Receiver: 0 = Comm desactivada; 1 = Comm activada
+
+	bool isRightTxComm();
+	bool isRightRxComm();
+	String prepareAddressBlock(unsigned int targetDev);
+	String preparePayloadBlock(char* command);
+};
+ 
+#endif
