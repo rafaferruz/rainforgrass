@@ -34,9 +34,11 @@ Serial.println(partOfMsg);
 	}
 	completeMsg = preparePayloadBlock(command);
 	completeMsg.toCharArray(partOfMsg, completeMsg.length()+1);
-	// Llamada a la librería VirtualWire para transmisión del paquete de direcciones
+	// Llamada a la librería VirtualWire para transmisión del paquete de comando o payload
 Serial.println(completeMsg);
 Serial.println(partOfMsg);
+	vw_wait_tx();
+	delay(1000);
 	if ( vw_send( (uint8_t*)partOfMsg, completeMsg.length()) == false) {
 		return false;
 	}
@@ -80,10 +82,10 @@ String RainPComm::prepareAddressBlock(unsigned int targetDev){
 	// Incluimos la Red de Destino
 	message.concat(targetNet);
 	message.concat("#");
-	// Incluimos la Dispositivo de Destino
+	// Incluimos el Dispositivo de Destino
 	message.concat(targetDev);
 	message.concat("#");
-	// Incluimos la Dispositivo de Origen
+	// Incluimos el Dispositivo de Origen
 	message.concat(sourceDev);
 	message.concat("#");
 	return message;

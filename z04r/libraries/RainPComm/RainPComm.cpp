@@ -47,37 +47,32 @@ Serial.println("Envío finalizado");
 }
 
 // Lee un mensaje desde el receptor sin verificación de direcciones ni estructuras de los bloques
-String RainPComm::getMessage(){
+String RainPComm::getMessage(unsigned int deviceId){
 	String completeMsg = "";
 	bool okMsg = false;
 	int payload = VW_MAX_PAYLOAD;
 	int* pPayload = &payload; 
 	char readBuffer[VW_MAX_PAYLOAD] = "" ;
-Serial.print("VW_MAX_PAYLOAD: ");
-Serial.println(VW_MAX_PAYLOAD);
 	if ( !isRightRxComm() ){
-Serial.println("RxComm is Right. ");
 		return false;
 	}
-Serial.print( "vw_have_message(): " );
-Serial.println( vw_have_message() );
 	if ( vw_have_message() ) {
 		okMsg = vw_get_message( (uint8_t*)readBuffer, (uint8_t*)pPayload );
-Serial.print( "readBuffer después de vw_get_message(): " );
-Serial.println( readBuffer );
 Serial.print( "okMsg = " );
-Serial.println( okMsg );
+Serial.print( okMsg );
 		if (okMsg) {
 			completeMsg = readBuffer;
 		}
 		if ( completeMsg == "" ) {
 			Serial.println("Paquete NO recibido. ");
 		} else {
-			Serial.print("OK. Paquete recibido: ");
-			Serial.println(completeMsg);
 		}
-	} else {
-		Serial.println("NO HAY Paquete ");
+Serial.print( " >> completeMsg después de vw_get_message(): " );
+Serial.println( completeMsg );
+Serial.print( " >> deviceId: " );
+Serial.println( deviceId );
+Serial.print( " >> validate: " );
+Serial.println( validateMessage( completeMsg, deviceId ));
 	}
 	return completeMsg;
 }
@@ -107,8 +102,8 @@ Serial.println("Setting up VirtualWire");
 }
 
 bool RainPComm::isRightRxComm(){
-delay(3000);
 	if ( stateRxComm == 0 ) {
+delay(3000);
 Serial.println("Setting up VirtualWire receiving");
 delay(1000);
 		if (rxPin > 0 && speedComm > 0) {
@@ -127,6 +122,7 @@ Serial.println("Setting up VirtualWire receiving");
 	}
 	return true;
 }
+
 String RainPComm::prepareAddressBlock(unsigned int targetDev){
 	String message = "#";
 	// Incluimos el número de bloque
@@ -163,4 +159,72 @@ String RainPComm::preparePayloadBlock(char* command){
 	message.concat("#");
 	return message;
 }
+
+bool RainPComm::validateMessage(String message, unsigned int deviceId){
+Serial.print( " >> hit 3: " );
+Serial.println( split( message, "#", 3) );
+ if ( split( message, "#", 3) == "A" ) {
+   // Verificamos direcciones de red y de dispositivo
+   if (checkNetworkAddress(message, this->targetNet) && checkDeviceAddress(message, deviceId)) {
+     Serial.println("Direcciones correctas");
+   }
+   
+ }
+  
+}
+
+bool RainPComm::checkNetworkAddress(String message, unsigned long address) {
+  String net = split(message, "#", 4);
+  if (net.length() == 0 ) {
+    return false;
+  }
+  if ( net == String(address) ) {
+    return true;
+  }
+  return false;
+}
+
+bool RainPComm::checkDeviceAddress(String message, unsigned int address) {
+  String dev = split(message, "#", 5);
+  if (dev.length() == 0 ) {
+    return false;
+  }
+  if ( dev == String(address) ) {
+    return true;
+  }
+  return false;
+}
+
+String RainPComm::split(String message, String separator, byte hit){
+  	String split = "";
+  	int start = 0;
+  	byte counter = 0;
+  	int i = 0;
+  	while ( start < message.length() ){
+    		i = message.indexOf(separator, start);
+    		++counter;
+    		if ( i < 0 ) {
+      			if (start == 0 && hit == 1) {
+        			return message;
+      			} else if (start == 0 && hit != counter ) {
+        			return "";
+      			} else if (start > 0 && hit == counter ) {
+        			return message.substring(start);
+      			} else if (start > 0 && hit != counter ) {
+        			return "";
+    			}
+		}
+    		if ( i == start && counter == hit ) {
+      			return "";
+    		} else if ( i > start  && counter == hit ) {
+      			return message.substring(start, i); 
+    		} else {
+      			start = i + separator.length();
+      			if (start >= message.length()) {
+        			return "";
+      			}
+    		}
+	}
+}
+
 
