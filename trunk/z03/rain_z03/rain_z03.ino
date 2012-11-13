@@ -261,7 +261,7 @@ void deactivateAllDevices() {
 }
 
 /*
-  Enva un mensaje a un dispositivo LiquidCrystal colocandolo a partir de la fila y columna indicada en los parmetros
+  Envía un mensaje a un dispositivo LiquidCrystal colocandolo a partir de la fila y columna indicada en los parmetros
   y concatenando las cadenas messageCode y value.
 */
 void sendMessage(LiquidCrystal lcd, int column, int row, String messageCode, char* value) {

@@ -11,7 +11,7 @@ public:
 	bool sendMessage(int targetDev, char* command);
 	void setTargetNet(unsigned long targetNet);
 	void setSourceDev(unsigned int sourceDev);
-	String getMessage();
+	String getMessage(unsigned int deviceId);
  
 private:
 
@@ -29,6 +29,11 @@ private:
 	bool isRightRxComm();
 	String prepareAddressBlock(unsigned int targetDev);
 	String preparePayloadBlock(char* command);
+	bool validateMessage(String message, unsigned int deviceId);
+	bool checkNetworkAddress(String message, unsigned long address);
+	bool checkDeviceAddress(String message, unsigned int address);
+	String split(String message, String separator, byte hit);
+
 };
  
 #endif

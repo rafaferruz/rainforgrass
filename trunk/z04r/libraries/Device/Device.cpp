@@ -90,3 +90,9 @@ bool Device::changePinLevel() {
 	return pinLevel;
 }
 
+String Device::getCommand(unsigned int deviceId) {
+	String command = "";
+	command = (*rp).getMessage(deviceId);
+	return command;
+}
+

@@ -18,6 +18,7 @@ public:
 	bool activate();
 	void setPinActivation(byte pinActivation);
 	void setDelayBetweenStates(unsigned int timeDelay);
+	String getCommand(unsigned int deviceId);
 
 private:
 	int deviceId;

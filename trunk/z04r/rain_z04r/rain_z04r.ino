@@ -50,32 +50,29 @@ void setup() {
 void loop() {
 
 	// Se pasa control al gestor de comunicaciones
-	commManager();
+	commManager(device);
 	// Se pasa control al activador del solenoide
-	deviceManager();
+//	deviceManager(device);
 }
 
-void deviceManager() {
+void deviceManager(Device device) {
 	if (actionCode == ACTION_DEACTIVATE) {
 	// Si el dispositivo debe estar desactivado, se fuerza dicho estado cada vez que deviceManager recibe ciclo de ejecución
 		device.deactivate();
 		return;
 	} else if (actionCode == ACTION_ACTIVATE) {
 	// Si el dispositivo debe estar activado, se cambia el estado del pin de salida para producir una tensión alterna necesaria para tener activo el solenoide de la electroválvula. La frecuencia de cambio de estado viene determinada principalmente por el valor de la variable DELAY_BETWEEN_STATES
-Serial.println("Activando device");
 		device.activate();
 		return;
 	}
 }
 
-void commManager() {
+void commManager(Device device) {
 	String message = "";
 	if ( isOverGapTime(timePrevious, MILLIS_BETWEEN_MESSAGES) ) {
 	// Se consulta si hay mensage recibido cada MILLIS_BETWEEN_MESSAGES milisegundos
-		message = rainPComm.getMessage();
+		message = device.getCommand(device.getDeviceId());
 		if (message.length() > 0) {
-			Serial.println(message);
-  actionCode=ACTION_ACTIVATE;
 		}
 	}
 }
