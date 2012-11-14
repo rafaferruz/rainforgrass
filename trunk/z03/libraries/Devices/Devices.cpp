@@ -43,9 +43,6 @@ bool Devices::removeDevice(Device device){
 	Devuelve el dispositivo que se encuentra en la posición indicada por el índice que se pasa como parámetro.
 */ 
 Device* Devices::getDevice(byte index){
-/*	if ( index > numDevices ) {
-		return NULL;
-	}*/
 	return pDevices + index;
 }
 

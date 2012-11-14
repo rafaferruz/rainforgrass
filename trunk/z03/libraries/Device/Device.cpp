@@ -34,7 +34,6 @@ bool Device::deactivate(){
 	this->state = 0;
 	// Operaciones de desactivación del dispositivo
 	char command[] = "002";
-Serial.println(command);
 	(*rp).sendMessage(this->deviceId, command);
 	return true;
 }
@@ -43,7 +42,6 @@ bool Device::activate(){
 	this->state = 1;
 	// Operaciones de activación del dispositivo
 	char command[] = "001";
-Serial.println(command);
 	(*rp).sendMessage(this->deviceId, command);
 	return true;
 }

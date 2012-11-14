@@ -18,7 +18,8 @@ public:
 	bool activate();
 	void setPinActivation(byte pinActivation);
 	void setDelayBetweenStates(unsigned int timeDelay);
-	String getCommand(unsigned int deviceId);
+	String readCommand(unsigned int deviceId);
+	String getCommand();
 
 private:
 	int deviceId;
@@ -29,6 +30,7 @@ private:
 	byte pinLevel;
 	byte pinActivation;
 	unsigned int delayBetweenStates;
+	String command;
 
 	bool isTimeOfChange( unsigned long time, unsigned int gapTime);
 	void setTimeOfChange( unsigned long time );

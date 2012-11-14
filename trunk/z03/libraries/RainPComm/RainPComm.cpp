@@ -27,22 +27,19 @@ bool RainPComm::sendMessage(int targetDev, char* command){
 	completeMsg = prepareAddressBlock(targetDev);
 	completeMsg.toCharArray(partOfMsg, completeMsg.length()+1);
 	// Llamada a la librería VirtualWire para transmisión del paquete de direcciones
-Serial.println(completeMsg);
-Serial.println(partOfMsg);
+	vw_wait_tx();
+	delay(10);
 	if ( vw_send( (uint8_t*)partOfMsg, (uint8_t)completeMsg.length()) == false) {
 		return false;
 	}
 	completeMsg = preparePayloadBlock(command);
 	completeMsg.toCharArray(partOfMsg, completeMsg.length()+1);
 	// Llamada a la librería VirtualWire para transmisión del paquete de comando o payload
-Serial.println(completeMsg);
-Serial.println(partOfMsg);
 	vw_wait_tx();
-	delay(1000);
-	if ( vw_send( (uint8_t*)partOfMsg, completeMsg.length()) == false) {
+	delay(10);
+	if ( vw_send( (uint8_t*)partOfMsg, (uint8_t)completeMsg.length()) == false) {
 		return false;
 	}
-Serial.println("Envío finalizado");
 	return true;
 }
 
@@ -60,7 +57,6 @@ bool RainPComm::isRightTxComm(){
 			//  Llamada a la librería VirtualWire para setup de Comm y activación del transmiter
 			vw_set_tx_pin( txPin );
 			vw_setup( speedComm );
-Serial.println("Setting up VirtualWire");
 		} else {
 			return false;
 		}

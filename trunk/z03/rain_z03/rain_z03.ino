@@ -208,11 +208,11 @@ void doAction(MenuOption menuOption, char* value){
                         idxDevice = devices.getDeviceIndex(atoi(value));
                         if (idxDevice >= 0 ) {
                             if ((*(devices.getDevice(idxDevice))).getState() == 0 ) {
-                                devices.activateById(atoi(value));
                                 sendMessage(lcd, 0, 0, "MM_ACT_", value);
+                                devices.activateById(atoi(value));
                             } else {
-                                devices.deactivateById(atoi(value));
                                 sendMessage(lcd, 0, 0, "MM_DACT_", value);
+                                devices.deactivateById(atoi(value));
                             }
                         } else {
                           sendMessage(lcd, 0, 0, "ERROR_DISP_", value);
