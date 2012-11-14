@@ -7,7 +7,8 @@ RainPComm::RainPComm( byte txPin, byte rxPin, unsigned int speedComm) :
 	speedComm (speedComm),
 	blockCounter(0),
 	stateTxComm(0),
-	stateRxComm(0)
+	stateRxComm(0),
+	command("")
 	{ }
  
 RainPComm::RainPComm(byte txPin, byte rxPin, unsigned int speedComm, unsigned long targetNet, unsigned int sourceDev) :
@@ -16,7 +17,8 @@ RainPComm::RainPComm(byte txPin, byte rxPin, unsigned int speedComm, unsigned lo
 	speedComm (speedComm),
 	targetNet (targetNet),
 	sourceDev (sourceDev),
-	blockCounter(0)
+	blockCounter(0),
+	command("")
 	{ }
 
 bool RainPComm::sendMessage(int targetDev, char* command){
@@ -29,50 +31,40 @@ bool RainPComm::sendMessage(int targetDev, char* command){
 	completeMsg = prepareAddressBlock(targetDev);
 	completeMsg.toCharArray(partOfMsg, completeMsg.length()+1);
 	// Llamada a la librería VirtualWire para transmisión del paquete de direcciones
-Serial.println(completeMsg);
-Serial.println(partOfMsg);
 	if ( vw_send( (uint8_t*)partOfMsg, completeMsg.length()) == false) {
 		return false;
 	}
 	completeMsg = preparePayloadBlock(command);
 	completeMsg.toCharArray(partOfMsg, completeMsg.length()+1);
 	// Llamada a la librería VirtualWire para transmisión del paquete de direcciones
-Serial.println(completeMsg);
-Serial.println(partOfMsg);
 	if ( vw_send( (uint8_t*)partOfMsg, completeMsg.length()) == false) {
 		return false;
 	}
-Serial.println("Envío finalizado");
 	return true;
 }
 
-// Lee un mensaje desde el receptor sin verificación de direcciones ni estructuras de los bloques
+// Lee un mensaje desde el receptor con verificación de direcciones y estructuras de los bloques
 String RainPComm::getMessage(unsigned int deviceId){
 	String completeMsg = "";
 	bool okMsg = false;
-	int payload = VW_MAX_PAYLOAD;
+	int payload = VW_MAX_MESSAGE_LEN;
 	int* pPayload = &payload; 
-	char readBuffer[VW_MAX_PAYLOAD] = "" ;
+	char readBuffer[VW_MAX_MESSAGE_LEN] = "" ;
 	if ( !isRightRxComm() ){
-		return false;
+		return completeMsg;
 	}
 	if ( vw_have_message() ) {
 		okMsg = vw_get_message( (uint8_t*)readBuffer, (uint8_t*)pPayload );
-Serial.print( "okMsg = " );
-Serial.print( okMsg );
 		if (okMsg) {
 			completeMsg = readBuffer;
+			if ( validateMessage( completeMsg, deviceId ) ) {
+				Serial.println( deviceId );
+				Serial.println( this->command );
+				completeMsg = this->command;
+			} else {
+				completeMsg = "";
+			}
 		}
-		if ( completeMsg == "" ) {
-			Serial.println("Paquete NO recibido. ");
-		} else {
-		}
-Serial.print( " >> completeMsg después de vw_get_message(): " );
-Serial.println( completeMsg );
-Serial.print( " >> deviceId: " );
-Serial.println( deviceId );
-Serial.print( " >> validate: " );
-Serial.println( validateMessage( completeMsg, deviceId ));
 	}
 	return completeMsg;
 }
@@ -93,7 +85,6 @@ bool RainPComm::isRightTxComm(){
 			vw_set_tx_pin( txPin );
 			vw_setup( speedComm );
 			stateTxComm = 1;
-Serial.println("Setting up VirtualWire");
 		} else {
 			return false;
 		}
@@ -103,19 +94,12 @@ Serial.println("Setting up VirtualWire");
 
 bool RainPComm::isRightRxComm(){
 	if ( stateRxComm == 0 ) {
-delay(3000);
-Serial.println("Setting up VirtualWire receiving");
-delay(1000);
 		if (rxPin > 0 && speedComm > 0) {
 			//  Llamada a la librería VirtualWire para setup de Comm y activación del receiver
-Serial.println(rxPin);
 			vw_set_rx_pin( rxPin );
-Serial.println(speedComm);
 			vw_setup( speedComm );
-Serial.println("Comm start.");
 			vw_rx_start();
 			stateRxComm = 1;
-Serial.println("Setting up VirtualWire receiving");
 		} else {
 			return false;
 		}
@@ -161,16 +145,40 @@ String RainPComm::preparePayloadBlock(char* command){
 }
 
 bool RainPComm::validateMessage(String message, unsigned int deviceId){
-Serial.print( " >> hit 3: " );
-Serial.println( split( message, "#", 3) );
- if ( split( message, "#", 3) == "A" ) {
-   // Verificamos direcciones de red y de dispositivo
-   if (checkNetworkAddress(message, this->targetNet) && checkDeviceAddress(message, deviceId)) {
-     Serial.println("Direcciones correctas");
-   }
-   
- }
-  
+	if (message == "") {
+		return false;
+	} else if ( message.substring(0, 1) != "#") {
+		return false;
+	}
+
+	String splitter = split( message, "#", 3);
+	if ( splitter == "A" ) {
+	   // Verificamos direcciones de red y de dispositivo
+		if (checkNetworkAddress(message, this->targetNet) && checkDeviceAddress(message, deviceId)) {
+			splitter = split( message, "#", 2);
+			char blockNumber[8] = "";
+			splitter.toCharArray( blockNumber, splitter.length() + 1);
+			this->addressBlockNumber = atoi(blockNumber);
+			return true;
+   		}
+		this->addressBlockNumber = 0;
+		return false;
+ 	}
+	if ( splitter == "P" ) {
+	   // Verificamos número de bloque consecutivo al de direcciones
+		splitter = split( message, "#", 2);
+		char blockNumber[8] = "";
+		splitter.toCharArray( blockNumber, splitter.length() + 1);
+		if ( (this->addressBlockNumber +1) == atoi(blockNumber) ){
+			this->command = split( message, "#", 4);
+			this->addressBlockNumber = 0;
+			return true;
+   		}
+		this->addressBlockNumber = 0;
+		return false;
+ 	}
+	this->addressBlockNumber = 0;
+	return false;  
 }
 
 bool RainPComm::checkNetworkAddress(String message, unsigned long address) {

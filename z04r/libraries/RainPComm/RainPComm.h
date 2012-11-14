@@ -24,6 +24,8 @@ private:
 	unsigned long blockCounter;
 	byte stateTxComm;	// Transmitter: 0 = Comm desactivada; 1 = Comm activada
 	byte stateRxComm;	// Receiver: 0 = Comm desactivada; 1 = Comm activada
+	unsigned long addressBlockNumber;
+	String command;
 
 	bool isRightTxComm();
 	bool isRightRxComm();

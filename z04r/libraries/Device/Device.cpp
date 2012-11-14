@@ -47,6 +47,7 @@ bool Device::deactivate(){
 }
 
 bool Device::activate(){
+Serial.println("activate");
 	if ( this->state == 0 ) {
 		setTimeOfChange( millis() );
 		this->state = 1;
@@ -64,7 +65,7 @@ bool Device::isTimeOfChange( unsigned long time, unsigned int gapTime) {
 	if ( millis() < time ) {
 		time = millis();
 	}
-	if ( ((millis() - time) > gapTime) ) {
+	if ( (millis() - time) > gapTime ) {
 		setTimeOfChange(millis());
 		return true;
 	}
@@ -90,9 +91,15 @@ bool Device::changePinLevel() {
 	return pinLevel;
 }
 
-String Device::getCommand(unsigned int deviceId) {
-	String command = "";
-	command = (*rp).getMessage(deviceId);
-	return command;
+String Device::readCommand(unsigned int deviceId) {
+	String command = (*rp).getMessage(deviceId);
+	if ( command.length() > 0 ) {
+		this->command = command;
+	}
+	return this->command;
+}
+
+String Device::getCommand() {
+	return this->command;
 }
 
