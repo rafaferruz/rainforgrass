@@ -47,7 +47,7 @@ bool Device::deactivate(){
 }
 
 bool Device::activate(){
-Serial.println("activate");
+
 	if ( this->state == 0 ) {
 		setTimeOfChange( millis() );
 		this->state = 1;
@@ -66,6 +66,7 @@ bool Device::isTimeOfChange( unsigned long time, unsigned int gapTime) {
 		time = millis();
 	}
 	if ( (millis() - time) > gapTime ) {
+Serial.println((millis() - time));
 		setTimeOfChange(millis());
 		return true;
 	}
