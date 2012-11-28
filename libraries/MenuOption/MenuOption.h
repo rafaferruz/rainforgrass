@@ -2,11 +2,13 @@
 #define MenuOption_h
 
 #include "Arduino.h"
+#include "TextInput.h"
 
 class MenuOption {
 public:
 	MenuOption() ;
 	MenuOption(byte, char* optionText, byte menuBackCode, byte menuNextCode, char* defaultValue, byte actionCode) ;
+	MenuOption(byte, char* optionText, byte menuBackCode, byte menuNextCode, char* defaultValue, byte actionCode, TextInput * textInput) ;
  
 	void setMenuCode(byte menuCode) ;
 	void setOptionText(char* optionText) ;
@@ -20,6 +22,7 @@ public:
 	byte getMenuBackCode() ;
 	char* getDefaultValue() ;
 	byte getActionCode() ;
+	TextInput * getTextInput() ;
 private:
 	byte menuCode;
 	char* optionText;
@@ -27,6 +30,7 @@ private:
 	byte menuBackCode;
 	char* defaultValue;
 	byte actionCode;
+	TextInput * pTextInput;
 };
  
 #endif
