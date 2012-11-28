@@ -1,0 +1,38 @@
+#######################################
+# Syntax Coloring Map For Debounce
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+DeviceSolenoid	 KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+initialize	KEYWORD2
+getDeviceId	KEYWORD2
+getNetCode	KEYWORD2
+getState	KEYWORD2
+deactivate	KEYWORD2
+activate	KEYWORD2
+setPinActivation	KEYWORD2
+setDelayBetweenStates	KEYWORD2
+readCommand	KEYWORD2
+getCommand	KEYWORD2
+isTimeOfChange	KEYWORD2
+setTimeOfChange	KEYWORD2
+changePinLevel	KEYWORD2
+setPinLevel	KEYWORD2
+
+
+#######################################
+# Instances (KEYWORD2)
+#######################################
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
