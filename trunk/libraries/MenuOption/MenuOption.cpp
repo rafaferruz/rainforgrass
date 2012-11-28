@@ -1,7 +1,9 @@
 #include "Arduino.h"
 #include "MenuOption.h"
+#include "TextInput.h"
  
 MenuOption::MenuOption() {
+	this->pTextInput = NULL;
 }
  
 MenuOption::MenuOption(byte menuCode, char* optionText, byte menuBackCode, byte menuNextCode, char* defaultValue, byte actionCode) {
@@ -11,6 +13,17 @@ MenuOption::MenuOption(byte menuCode, char* optionText, byte menuBackCode, byte 
 	this->menuBackCode = menuBackCode ;
 	this->defaultValue = defaultValue ;
 	this->actionCode = actionCode ;
+	this->pTextInput = NULL;
+}
+
+MenuOption::MenuOption(byte menuCode, char* optionText, byte menuBackCode, byte menuNextCode, char* defaultValue, byte actionCode, TextInput * textInput) {
+	this->menuCode = menuCode ;
+	this->optionText = optionText ;
+	this->menuNextCode = menuNextCode ;
+	this->menuBackCode = menuBackCode ;
+	this->defaultValue = defaultValue ;
+	this->actionCode = actionCode ;
+	this->pTextInput = textInput ;
 }
 
 void MenuOption::setMenuCode(byte menuCode){
@@ -60,4 +73,9 @@ char* MenuOption::getDefaultValue(){
 byte MenuOption::getActionCode(){
 	return actionCode;
 }
+
+TextInput * MenuOption::getTextInput(){
+	return pTextInput;
+}
+
   

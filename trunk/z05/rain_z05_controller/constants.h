@@ -23,9 +23,12 @@ String KEYPAD_USER_KEY_MAP = "123A456B789C*0#D";
 const byte MAX_KEYPAD_ENTRY = 3;
 
 // Definiciones de acciones a ejecutar. El número entero es el que debe codificarse en el campo actionCode de MenuOption.
+const byte NO_ACTION = 0;
 const byte ACTION_ACTIVATE = 1;
 const byte ACTION_DEACTIVATE = 2;
 const byte ACTION_ON_OFF = 3;
+const byte SET_DATE = 41;
+const byte SET_TIME = 42;
 
 // Definición de parámetros de comunicaciones Serial
 const unsigned long SERIAL_SPEED = 9600;
@@ -51,3 +54,9 @@ const byte RC_PIN = 12;
 const unsigned long SPEED_COMM = 1200;
 const unsigned long TARGET_NET = 11111;
 const unsigned int SOURCE_DEV = 111;
+
+// Tipos de chequeo con datos entrados desde el keypad
+const byte NOTHING_TO_DO = 0;
+const byte CHECK_DATE = 1;
+const byte CHECK_TIME = 2;
+

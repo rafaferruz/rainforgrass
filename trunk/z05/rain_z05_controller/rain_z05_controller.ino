@@ -12,6 +12,9 @@ en la memoria flash */
 // La librera Keypad proporciona funcionalidad para la entrada de datos desde teclados o keypads matriciales
 #include <Keypad.h>
 
+// La librera TextInput permite crear objetos que chequean y gestionan los datos entrados a traves del keypad
+#include <TextInput.h>
+
 // La librería Bounce nos proporciona funcionalidad para comprobar el estado de los botones de control de la aplicación.
 #include <Bounce.h>
 // Se utiliza la librería LiquidCrystal.h para controlar el display LCD
@@ -68,11 +71,12 @@ void setup() {
 
   // Rellenamos las opciones del menú de la aplicación
   menux.addMenuOption( MenuOption( 1, "MODO MANUAL", 0, 2, "", 0));
-  menux.addMenuOption( MenuOption( 2, "Dispositivo:", 1, 0, "0", ACTION_ON_OFF));
+  menux.addMenuOption( MenuOption( 2, "Dispositivo:", 1, 0, "0", ACTION_ON_OFF, new TextInput(1, "#", NOTHING_TO_DO)));
   menux.addMenuOption( MenuOption( 1, "MODO PROGRAMA", 0, 3, "", 0));
   menux.addMenuOption( MenuOption( 3, "No disponible 3", 1, 1, "", 0));
   menux.addMenuOption( MenuOption( 1, "MODO CONFIG.", 0, 4, "", 0));
-  menux.addMenuOption( MenuOption( 4, "No disponible 4", 1, 1, "", 0));
+  menux.addMenuOption( MenuOption( 4, "Fecha:", 1, 4, "", SET_DATE, new TextInput(8, "########", CHECK_DATE)));
+  menux.addMenuOption( MenuOption( 4, "Hora:", 1, 0, "", SET_TIME, new TextInput(6, "######", CHECK_TIME)));
 
   // Definimos el código del menú inicial a mostrar
   menux.setPresentMenuCode(MENU_START_CODE);
@@ -110,38 +114,35 @@ void loop() {
 	if (isButtonCancellation(key)) {
                 devices.deactivateAll();
                 menux.showMenuOption(lcd);
-                keypadBuffer = "";
+                setOptionInputText(&menux, "");
 	} else if (isButtonBackRising(key)) {
                 devices.deactivateAll();
 		goBackMenu();
                 menux.showMenuOption(lcd);
-                keypadBuffer = "";
+                setOptionInputText(&menux, "");
 	} else if (isButtonOptionRising(key)) {
 		goNextOption();
                 menux.showMenuOption(lcd);
-                keypadBuffer = "";
+                setOptionInputText(&menux, "");
 	} else if (isButtonSelectRising(key)) {
-		presentMenuOption = menux.getPresentMenuOption();
 		// Recibimos el valor de la opción validada o un valor vacío si se trata de navegación a submenú
-                if (keypadBuffer != "" && presentMenuOption.getActionCode() != 0 ) {
-                  keypadBuffer.toCharArray(optionValue,keypadBuffer.length()+1);
+                if (getOptionInputText(&menux) != "" 
+                  && menux.getPresentMenuOption().getActionCode() != NO_ACTION ) {
+                  getOptionInputText(&menux).toCharArray(optionValue,getOptionInputText(&menux).length()+1);
                 } else {
                   strcpy(optionValue, getSelectOptionValue());
                 }
                 menux.showMenuOption(lcd);
-                keypadBuffer = "";
+                setOptionInputText(&menux, "");
 
 		if (optionValue != "") {
 			doAction(presentMenuOption, optionValue);
 		}
 
 	} else {
-                if (keypadBuffer.length() < MAX_KEYPAD_ENTRY) {
-                  keypadBuffer = keypadBuffer + key;
-                }
-		presentMenuOption = menux.getPresentMenuOption();
-                if (presentMenuOption.getActionCode() != 0) {
-                  menux.showMenuOption(lcd, keypadBuffer);
+                menux.getPresentMenuOption().getTextInput()->addChar(key);
+                if (menux.getPresentMenuOption().getActionCode() != NO_ACTION) {
+                  menux.showMenuOption(lcd, getOptionInputText(&menux));
                 }
         }
                 
@@ -232,4 +233,14 @@ void sendMessage(LiquidCrystal lcd, int column, int row, String messageCode, cha
   lcd.setCursor( column, row);
   messageCode.concat(value);
   lcd.print(messageCode);
-} 
+}
+
+String getOptionInputText(Menux * menux){
+  return menux->getPresentMenuOption().getTextInput()->getTextBuffer();
+}
+
+void setOptionInputText(Menux * menux, String text){
+  return menux->getPresentMenuOption().getTextInput()->setTextBuffer(text);
+}
+
+
