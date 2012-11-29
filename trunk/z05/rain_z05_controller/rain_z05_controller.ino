@@ -45,8 +45,8 @@ controlar */
 boolean showAction = false;
 byte activeMode = 0;
 char optionValue[MAX_KEYPAD_ENTRY + 1] = "";
-MenuOption presentMenuOption;
-String keypadBuffer;
+//MenuOption presentMenuOption;
+//String keypadBuffer;
 Device pDevices[MAX_NUM_DEVICES];
 Devices devices = Devices( pDevices, MAX_NUM_DEVICES );
 RainPComm rainPComm = RainPComm( TX_PIN, RC_PIN, SPEED_COMM, TARGET_NET, SOURCE_DEV);
@@ -70,11 +70,11 @@ void setup() {
   lcd.begin(LCD_COLUMNS, LCD_ROWS);
 
   // Rellenamos las opciones del menú de la aplicación
-  menux.addMenuOption( MenuOption( 1, "MODO MANUAL", 0, 2, "", 0));
+  menux.addMenuOption( MenuOption( 1, "MODO MANUAL", 0, 2, "", NO_ACTION));
   menux.addMenuOption( MenuOption( 2, "Dispositivo:", 1, 0, "0", ACTION_ON_OFF, new TextInput(1, "#", NOTHING_TO_DO)));
-  menux.addMenuOption( MenuOption( 1, "MODO PROGRAMA", 0, 3, "", 0));
-  menux.addMenuOption( MenuOption( 3, "No disponible 3", 1, 1, "", 0));
-  menux.addMenuOption( MenuOption( 1, "MODO CONFIG.", 0, 4, "", 0));
+  menux.addMenuOption( MenuOption( 1, "MODO PROGRAMA", 0, 3, "", NO_ACTION));
+  menux.addMenuOption( MenuOption( 3, "No disponible 3", 1, 1, "", NO_ACTION));
+  menux.addMenuOption( MenuOption( 1, "MODO CONFIG.", 0, 4, "", NO_ACTION));
   menux.addMenuOption( MenuOption( 4, "Fecha:", 1, 4, "", SET_DATE, new TextInput(8, "########", CHECK_DATE)));
   menux.addMenuOption( MenuOption( 4, "Hora:", 1, 0, "", SET_TIME, new TextInput(6, "######", CHECK_TIME)));
 
@@ -82,7 +82,7 @@ void setup() {
   menux.setPresentMenuCode(MENU_START_CODE);
   menux.setTitleMenuOption(MENU_MAIN_TITLE);
 
-  menux.searchNextOption( 0, MENU_START_CODE);
+//  menux.searchNextOption( 0, MENU_START_CODE);
   menux.showMenuOption(lcd);
   
   // Inicializacin del keypad
@@ -107,8 +107,8 @@ void loop() {
 	// Hacemos un delay de DELAY_CHECK_KEYS milisegundos entre consultas de pulsaciones
 	delay(DELAY_CHECK_KEYS);
   // Consultamos si se ha pulsado alguna tecla
-  char key = keypad.waitForKey();
-//  char key = keypad.getKey();
+//  char key = keypad.waitForKey();
+  char key = keypad.getKey();
   if (key != 0) {
 	// Consultamos si se ha pulsado algún botón
 	if (isButtonCancellation(key)) {
@@ -126,22 +126,27 @@ void loop() {
                 setOptionInputText(&menux, "");
 	} else if (isButtonSelectRising(key)) {
 		// Recibimos el valor de la opción validada o un valor vacío si se trata de navegación a submenú
-                if (getOptionInputText(&menux) != "" 
-                  && menux.getPresentMenuOption().getActionCode() != NO_ACTION ) {
-                  getOptionInputText(&menux).toCharArray(optionValue,getOptionInputText(&menux).length()+1);
+		if ( menux.getPresentMenuOption().getActionCode() != NO_ACTION ) {
+                  if (getOptionInputText(&menux) != "" ) {
+                    getOptionInputText(&menux).toCharArray(optionValue,getOptionInputText(&menux).length()+1);
+                  } else {
+                    strcpy(optionValue, getSelectOptionValue());
+                  }
+        		if (optionValue != "") {
+                                menux.showMenuOption(lcd);
+                                setOptionInputText(&menux, "");
+        			doAction(menux.getPresentMenuOption(), optionValue);
+        		}
                 } else {
-                  strcpy(optionValue, getSelectOptionValue());
+                  menux.searchNextOption(menux.getPresentOption(), menux.getPresentMenuOption().getMenuNextCode());
+                  menux.showMenuOption(lcd);
+                  setOptionInputText(&menux, "");
                 }
-                menux.showMenuOption(lcd);
-                setOptionInputText(&menux, "");
 
-		if (optionValue != "") {
-			doAction(presentMenuOption, optionValue);
-		}
 
 	} else {
-                menux.getPresentMenuOption().getTextInput()->addChar(key);
                 if (menux.getPresentMenuOption().getActionCode() != NO_ACTION) {
+                  menux.getPresentMenuOption().getTextInput()->addChar(key);
                   menux.showMenuOption(lcd, getOptionInputText(&menux));
                 }
         }

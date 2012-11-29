@@ -3,7 +3,8 @@
 #include "Menux.h"
  
 Menux::Menux() :
-	lastOption(0)
+	lastOption(0),
+	presentOption(0)
 { }
 
 void Menux::addMenuOption(MenuOption menuOption) {
@@ -70,6 +71,7 @@ byte Menux::searchNextOption(byte fromOption, byte menuCodeToSearch) {
 	byte i;
 	for ( i = fromOption + 1; i < lastOption; i++) {
 		if (menuOptionList[i].getMenuCode() == menuCodeToSearch) {
+			presentOption = i;
 			presentMenuCode = menuOptionList[i].getMenuCode();
 			setTitleMenuOption(*searchTitleMenuOption(i) + ": " + *menuOptionList[fromOption].getDefaultValue());
 			return i;
@@ -77,6 +79,7 @@ byte Menux::searchNextOption(byte fromOption, byte menuCodeToSearch) {
 	}
 	for ( i = 0; i < fromOption; i++) {
 		if (menuOptionList[i].getMenuCode() == menuCodeToSearch) {
+			presentOption = i;
 			presentMenuCode = menuOptionList[i].getMenuCode();
 			setTitleMenuOption(*searchTitleMenuOption(i) + ": " + *menuOptionList[fromOption].getDefaultValue());
 			return i;
