@@ -1,0 +1,106 @@
+RAIN_Z application for Arduino
+
+Version 0.2
+
+by Rafael Ferruz Martínez
+
+contact: rafaferruz@hotmail.com
+
+See the online documentation here: No disposable
+
+
+OBJETIVOS
+=========
+
+RAIN_Z es una aplicación diseñada para controlar un sistema de riego mediante placas Arduino.
+
+	La idea inicial a desarrollar es diseñar un controlador central que permita transmitir a una electroválvula de riego la orden de abrir o cerrar el paso del agua de una zona de riego. En versiones posteriores se desarrollarán sistemas de programación de riego por zonas y control de tiempos. La particularidad de este diseño es que la comunicación entre el controlador central y la electrónica de control de la electroválvula deberá ser inalambrica vía radio para poder ser montada sin la necesidad de realizar obras de canalización de cableado soterradas o aéreas, con alcances cortos-medios (hasta 80-100 metros) y posibilidad de alcances medios-largos (hasta 2000 metros).
+
+	La idea inicial plantea la necesidad de diseñar y desarrollar tres partes: controlador central, control de electroválvula y medio de comunicación.
+
+CONTROLADOR CENTRAL
+===================
+
+	El controlador central es un instrumento que debe permitir al usuario la programación y envío de órdenes de arraque/parada a la electroválvula.
+
+	La comunicación entre el controlador y el usuario se realizará a través de un display LCD y un teclado de botones.
+
+	El diseño inicial incorporará un display LCD de 16x2 y soportará dos tipos de teclado de botones, una de ellas consistirá en tres botones y la otra permitirá utilizar un teclado (keypad) matricial de 16 botones.
+
+	El display LCD de 16 columnas por 2 filas debe ser compatible con el modelo    y se utilizará para su control la librería LiquidCrystal.
+
+	El método de funcionalidad mediante tres botones pulsadores permitirá al usuario dar órdenes de ejecución de operaciones y/o modificación de parámetros de la aplicación mediante la navegación a través de un menú mostrado en el display LCD, asignando a cada uno de los botones las funcionalidades de 'Retroceder a submenú anterior', 'Navegar a la siguiente opción  de un submenú o Cambiar el valor de un parámetro' y 'Seleccionar una opción de menú o validar el valor mostrado en el display'.
+
+	El método de funcionalidad mediante un teclado/keypad de 16 botones permitirá al usuario la navegación por los menús de la aplicación y la entrada de valores numéricos con las teclas numéricas del 0 al 9 del teclado. El resto de teclas su usarán para las diferentes funciones de navegación y operaciones de validación o borrado de valores. La siguiente tabla muestra la funcionalidad de cada tecla de comando:
+
+	#	Muestra el Menú principal o regresa al nivel superior inmediato a la opción de navegación en la que se encuentre el usuario.
+	D	Representa la tecla de validación de un valor mostrado o introducido por el teclado.
+	A	Subir a la opción anterior del nivel de navegación en el que se encuentre el usuario.
+	B	Baja a la opción siguiente del nivel de navegación en el que se encuentre el usuario.
+	C	Borra el último caracter introducido mediante el teclado.
+	*	Detiene la actividad de todos los dispositivos.
+
+
+MENU DE NAVEGACION
+==================
+
+	MENU GENERAL
+		MODO MANUAL
+			[1-4]D	Activa el dispositivo indicado mediante una cifra entre 1 y 4.
+			*	Detiene la actividad de todos los dispositivos.
+		MODO PROGRAMA
+		MODO CONFIGURACION	
+
+	
+	Esta primera versión del Menú General pretende únicamente establecer el modo de funcionamiento básico del teclado de la consola de usuario, por lo que no se desarrollan opciones en los modos PROGRAMA y CONFIGURACION, existiendo estos para establecer un menú de usuario mínimo.
+
+	La creación de menús en la aplicación se realiza mediante el uso de dos clases: Menux y MenuOption.
+
+	Menux ofrece la funcionalidad de navegación a través de las distintas opciones representadas por una colección de objetos MenuOption. Cada objeto MenuOption contiene las definiciones de cada una de las opciones del menú.
+	Para la creación de un objeto Menux se deben ir creando cada uno de los objetos MenuOption mediante el constructor que tiene la clase MenuOption, los cuales van a definir cada una de las opciones. Los datos que se debenn suministrar como parámetros del constructor son:
+
+		- Código numérico asignado al grupo de opciones al que queramos que pertenezca la opción definida.
+		- Texto de la opción o solicitud de dato. Se trata de una palabra o texto con un máximo de 16 caracteres.
+		- Código numérico del grupo de opciones del nivel superior o a volver cuando se salga del grupo de la opción.
+		- Código numérico del grupo de opciones del nivel inferior o siguiente cuando opción a definir tenga un subnivel de opciones o datos a definir o configurar.
+		- Valor por defecto a asignar cuando se valide la opción sin proporcionar ningún valor por teclado.
+		- Action Code: Es un código que indica la acción que debe ser ordenada al dispositivo o que debe ser ejecutada por el software. La tabla inicial de Action Code es la siguiente:
+
+			1	Activación de un dispositivo
+			2	Desactivación de un dispositivo
+			9	Cambia el estado de Activación/Desactivación que tenga un dispositivo
+
+
+GESTION DE COMUNICACIONES
+=========================
+
+	Para la gestión de las comunicaciones se utilizará la librería VirtualWire.
+
+	La versión 0 de la aplicación RAIN_Z proporcionará comunicación exclusivamente unidireccional emisor (controlador central) a receptor (dispositivo de activación/desactivación de electroválvula). Por tanto, no existe la posibilidad de conocer si el receptor recibe los comandos de órdenes correctamente aunque se usará un protocolo de  verificación de errores de transmisión mediante checksum de la información enviada.
+
+	Para el envío de comandos u órdenes a los dispositivos se utilizará un protocolo de comunicaciones propio RainP
+y que determina la estructura de los paquetes de información enviada, incluyendo los datos a transmitir y los dígitos de control para verificación de errores de transmisión. RainP es accesible mediante la librería 'RainPComm.h' que ofrece un interface de acceso muy simplificado para la utilización del protocolo RainP. 
+
+	'RainP.h' se encarga de iniciar y detener los dispositivos de comunicaciones, llevar el control de bloques emitidos y recibidos, aceptar o rechazar los paquetes recibidos y comprobar la recepción correcta de la información. El usuario de la librería, por tanto, solamente debe preocuparse de pasar a la librería los comandos a enviar y preguntar si hay algún paquete recibido pendiente de atender.
+
+
+PROTOCOLO DE COMUNICACIONES RainP
+=================================
+
+	El protocolo RainP define la estructura de los paquetes de datos a transmitir entre dispositivos de una misma red funcionando bajo el control de una aplicación RainZ. Cada envío de datos se realiza construyendo dos bloques de información que se enviarán independientemente pero uno detrás de otro, cuidando que el contador de bloque que se incluye en cada bloque tengan una numeración correlativa. Estos dos paquetes de información se definen como Bloque de Direcciones (AddressBlock) y Bloque de Comando (PayloadBlock) deberá constar de los siguientes datos:
+
+	La estructura del Bloque de Direcciones es la siguiente:
+
+	Número de paquete		Número entero largo entre 1 y 16.000.000
+	Tipo de paquete			Siempre "A" (Addresses)
+	Red de destino			Número entero largo entre 1 y 16.000.000
+	Dispositivo de destino		Número entero entre 1 y 65332.
+	Dispositivo de origen		Número entero entre 1 y 65332.
+
+	La estructura del Bloque de Comando es la siguiente:
+
+	Número de paquete		Número entero largo entre 1 y 16.000.000.
+	Tipo de paquete			Siempre "P" (Payload)
+	Comando de ejecución		Número entero entre 1 y 65332, según la tabla de comandos de la aplicación RainZ.
+
+	Dentro de cada paquete cada dato irá separado del siguiente por un caracter '#'. Además, cada paquete deberá comenzar y finalizar con el mismo caracter '#'.

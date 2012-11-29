@@ -1,0 +1,26 @@
+RAIN_Z application for Arduino
+
+Version 04
+
+by Rafael Ferruz Martínez
+
+contact: rafaferruz@hotmail.com
+
+See the online documentation here: No disposable
+
+
+SOFTWARE PARA DISPOSITIVOS DE TIPO SOLENOIDE (solo recepción)
+=============================================================
+
+	El software a desarrollar en esta versión es el que deben implementar los dispositivos que controlan los solenoides de una electroválvula. Solamente se desarrollará un sistema que reciba los paquetes de información, los filtre para rechazar los que no vayan dirigidos al dispositivo y ejecute el comando recibido. No se reenvían paquetes de notificación de recepción ni solicitudes de reenvío o notificaciones de estado, siendo la comunicación en un único sentido, emisor a receptor.
+
+	Los pasos que debe realizar el software son los siguientes:
+
+	1. Esperar la llegada de un paquete.
+	2. Chequeo de formato e integridad del paquete.
+	3. Chequeo de dirección de destino.
+	4. Espera de recepción del siguiente paquete de datos.
+	5. Chequeo de número de paquete.
+	6. Extracción de comando a ejecutar.
+	7. Ejecución de comando.
+

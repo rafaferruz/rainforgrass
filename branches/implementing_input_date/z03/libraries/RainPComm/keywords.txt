@@ -1,0 +1,29 @@
+#######################################
+# Syntax Coloring Map For Debounce
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+RainPComm	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+sendMessage	KEYWORD2
+setTargetNet	KEYWORD2
+setSourceDev	KEYWORD2
+isRightTxComm	KEYWORD2
+prepareAddressBlock	KEYWORD2
+preparePayloadBlock	KEYWORD2
+
+#######################################
+# Instances (KEYWORD2)
+#######################################
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
