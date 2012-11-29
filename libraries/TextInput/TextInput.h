@@ -10,7 +10,7 @@ public:
 
 	void setParams(byte maxLength, String pattern, byte checkCode) ;
 	void setTextBuffer(String initialTextBuffer);
-	String getTextBuffer();
+	const String getTextBuffer();
 	bool addChar(char key);
  
 private:
