@@ -71,7 +71,7 @@ void setup() {
 
   // Rellenamos las opciones del menú de la aplicación
   menux.addMenuOption( MenuOption( 1, "MODO MANUAL", 0, 2, "", NO_ACTION));
-  menux.addMenuOption( MenuOption( 2, "Dispositivo:", 1, 0, "0", ACTION_ON_OFF, new TextInput(1, "#", NOTHING_TO_DO)));
+  menux.addMenuOption( MenuOption( 2, "Dispositivo:", 1, 0, "0", ACTION_ON_OFF, new TextInput(2, "*#", NOTHING_TO_DO)));
   menux.addMenuOption( MenuOption( 1, "MODO PROGRAMA", 0, 3, "", NO_ACTION));
   menux.addMenuOption( MenuOption( 3, "No disponible 3", 1, 1, "", NO_ACTION));
   menux.addMenuOption( MenuOption( 1, "MODO CONFIG.", 0, 4, "", NO_ACTION));
@@ -128,6 +128,14 @@ void loop() {
 		// Recibimos el valor de la opción validada o un valor vacío si se trata de navegación a submenú
 		if ( menux.getPresentMenuOption().getActionCode() != NO_ACTION ) {
                   if (getOptionInputText(&menux) != "" ) {
+                    if (menux.getPresentMenuOption().getTextInput()->matchTextBuffer() == false ) {
+// DEBEMOS GUARDAR EL VALOR ENTRADO
+                      menux.showMenuOption(lcd);
+                      setOptionInputText(&menux, "");
+                      getOptionInputText(&menux).toCharArray(optionValue,getOptionInputText(&menux).length()+1);
+                      sendMessage(lcd, 0, 0, "ERROR_INPUT:", optionValue);
+                      return;
+                    }
                     getOptionInputText(&menux).toCharArray(optionValue,getOptionInputText(&menux).length()+1);
                   } else {
                     strcpy(optionValue, getSelectOptionValue());

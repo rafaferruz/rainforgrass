@@ -20,7 +20,7 @@ const byte KEYPAD_ROWS = 4;
 byte KEYPAD_ROW_PINS[KEYPAD_ROWS] = { 11, 10, 9, 8 };
 byte KEYPAD_COL_PINS[KEYPAD_COLUMNS] = { 5, 4, 3, 2 };
 String KEYPAD_USER_KEY_MAP = "123A456B789C*0#D";
-const byte MAX_KEYPAD_ENTRY = 3;
+const byte MAX_KEYPAD_ENTRY = 8;
 
 // Definiciones de acciones a ejecutar. El número entero es el que debe codificarse en el campo actionCode de MenuOption.
 const byte NO_ACTION = 0;
