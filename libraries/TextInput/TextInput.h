@@ -12,12 +12,18 @@ public:
 	void setTextBuffer(String initialTextBuffer);
 	const String getTextBuffer();
 	bool addChar(char key);
+	bool matchTextBuffer();
  
 private:
 	byte maxLength;
 	String pattern;
 	byte checkCode;
 	String textBuffer;
+
+	bool textBufferAllNumbers(String text);
+	bool textBufferAllAlphabetics(String text);
+	bool textBufferMatchMixed(String text);
+	bool matchCheckCode();
 };
  
 #endif

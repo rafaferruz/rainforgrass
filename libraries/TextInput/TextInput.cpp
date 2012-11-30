@@ -42,4 +42,57 @@ bool TextInput::addChar(char key){
 	return false;
 }
 
+bool TextInput::matchTextBuffer(){
+	if (this->pattern == "") {
+		return true;
+	} else if (this->pattern == "*#") {
+		return textBufferAllNumbers(textBuffer);
+	} else if (this->pattern == "*$") {
+		return textBufferAllAlphabetics(textBuffer);
+	} else {
+		return textBufferMatchMixed(textBuffer);
+	}
+	return false;
+}
 
+bool TextInput::textBufferAllNumbers(String text) {
+	int i;
+	String validChars = "0123456789";
+	for (i = 0; i < text.length(); i++) {
+		if (validChars.indexOf(text.charAt(i)) < 0) {
+			return false;
+		} 
+	}
+}
+
+bool TextInput::textBufferAllAlphabetics(String text) {
+	int i;
+	String validChars = "ABCDabcd";
+	for (i = 0; i < text.length(); i++) {
+		if (validChars.indexOf(text.charAt(i)) < 0) {
+			return false;
+		} 
+	}
+}
+
+bool TextInput::textBufferMatchMixed(String text) {
+	int i;
+	String validCharsN = "0123456789";
+	String validCharsA = "ABCDabcd";
+	for (i = 0; i < text.length(); i++) {
+		if (((pattern.substring(i, i+1) == "#") && (validCharsN.indexOf(text.charAt(i)) < 0)) ||((pattern.substring(i, i+1)  == "%") && (validCharsA.indexOf(text.charAt(i)) < 0))) {
+			return false;
+		} 
+	}
+}
+
+bool TextInput::matchCheckCode(){
+	switch (checkCode) {
+		case NOTHING_TO_DO:
+			return true;
+		case CHECK_DATE:
+
+		default:
+			return false;			
+	}
+}
