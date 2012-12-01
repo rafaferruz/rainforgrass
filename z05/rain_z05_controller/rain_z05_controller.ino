@@ -128,12 +128,13 @@ void loop() {
 		// Recibimos el valor de la opción validada o un valor vacío si se trata de navegación a submenú
 		if ( menux.getPresentMenuOption().getActionCode() != NO_ACTION ) {
                   if (getOptionInputText(&menux) != "" ) {
+                    Serial.println(menux.getPresentMenuOption().getTextInput()->matchTextBuffer());
                     if (menux.getPresentMenuOption().getTextInput()->matchTextBuffer() == false ) {
 // DEBEMOS GUARDAR EL VALOR ENTRADO
+                      getOptionInputText(&menux).toCharArray(optionValue,getOptionInputText(&menux).length()+1);
                       menux.showMenuOption(lcd);
                       setOptionInputText(&menux, "");
-                      getOptionInputText(&menux).toCharArray(optionValue,getOptionInputText(&menux).length()+1);
-                      sendMessage(lcd, 0, 0, "ERROR_INPUT:", optionValue);
+                      sendMessage(lcd, 0, 0, "ERR_IN:", optionValue);
                       return;
                     }
                     getOptionInputText(&menux).toCharArray(optionValue,getOptionInputText(&menux).length()+1);
