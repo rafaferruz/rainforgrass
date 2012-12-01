@@ -2,6 +2,10 @@
 #define TextInput_h
 
 #include "Arduino.h"
+	// Tipos de chequeo con datos entrados desde el keypad
+	const byte NOTHING_TO_DO = 0;
+	const byte CHECK_DATE = 1;
+	const byte CHECK_TIME = 2;
 
 class TextInput {
 public:
@@ -12,18 +16,19 @@ public:
 	void setTextBuffer(String initialTextBuffer);
 	const String getTextBuffer();
 	bool addChar(char key);
-	bool matchTextBuffer();
+	const bool matchTextBuffer();
  
 private:
+
 	byte maxLength;
 	String pattern;
 	byte checkCode;
 	String textBuffer;
 
-	bool textBufferAllNumbers(String text);
-	bool textBufferAllAlphabetics(String text);
-	bool textBufferMatchMixed(String text);
-	bool matchCheckCode();
+	const bool textBufferAllNumbers(String text);
+	const bool textBufferAllAlphabetics(String text);
+	const bool textBufferMatchMixed(String text);
+	const bool matchCheckCode();
 };
  
 #endif

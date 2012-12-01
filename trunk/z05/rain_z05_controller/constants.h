@@ -55,8 +55,10 @@ const unsigned long SPEED_COMM = 1200;
 const unsigned long TARGET_NET = 11111;
 const unsigned int SOURCE_DEV = 111;
 
+#ifndef TextInput_h
+#define TextInput_h
 // Tipos de chequeo con datos entrados desde el keypad
 const byte NOTHING_TO_DO = 0;
 const byte CHECK_DATE = 1;
 const byte CHECK_TIME = 2;
-
+#endif
