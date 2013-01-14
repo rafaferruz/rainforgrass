@@ -11,11 +11,11 @@ public:
  
 	void initialize(int id, int  net);
 	void initialize(int id, int  net, RainPComm * rp);
-	int getDeviceId() ;
-	int getNetCode() ;
-	byte getState() ;
-	bool deactivate();
-	bool activate();
+	const int getDeviceId() ;
+	const int getNetCode() ;
+	const byte getState() ;
+	bool deactivate(char * command);
+	bool activate(char * command);
 
 private:
 	int deviceId;

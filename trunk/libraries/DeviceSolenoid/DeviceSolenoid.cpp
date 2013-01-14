@@ -5,7 +5,7 @@ DeviceSolenoid::DeviceSolenoid() :
 	deviceId( -1 ),
 	netCode( -1 ),
 	state(0),
-	delayBetweenStates(10)
+	delayBetweenStates(5000)
 { }
 
 void DeviceSolenoid::initialize(int id, int  net) {
@@ -44,6 +44,8 @@ bool DeviceSolenoid::deactivate(){
 	// Operaciones de desactivación del dispositivo
 	setPinLevel(0);
 		digitalWrite(pinActivation, LOW);
+		digitalWrite(8, LOW);
+		digitalWrite(9, LOW);
 
 	return true;
 }
@@ -68,6 +70,7 @@ bool DeviceSolenoid::isTimeOfChange( unsigned long time, unsigned int gapTime) {
 		time = millis();
 	}
 	if ( (millis() - time) > gapTime ) {
+
 		setTimeOfChange(millis());
 		return true;
 	}
@@ -80,15 +83,25 @@ void DeviceSolenoid::setTimeOfChange( unsigned long time ) {
 
 void DeviceSolenoid::setPinLevel(byte level) {
 	pinLevel = level;
+		digitalWrite(8, LOW);
+		digitalWrite(9, LOW);
 }
 
 bool DeviceSolenoid::changePinLevel() {
 	if (pinLevel == 0){
+Serial.println("pinlevel = 1");
 		pinLevel = 1;
 		digitalWrite(pinActivation, HIGH);
+		digitalWrite(8, LOW);
+		digitalWrite(9, LOW);
+		digitalWrite(8, HIGH);
 	} else {
+Serial.println("pinlevel = 0");
 		pinLevel = 0;
 		digitalWrite(pinActivation, LOW);
+		digitalWrite(8, LOW);
+		digitalWrite(9, LOW);
+		digitalWrite(9, HIGH);
 	}
 	return pinLevel;
 }

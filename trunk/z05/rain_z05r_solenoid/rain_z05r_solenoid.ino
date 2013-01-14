@@ -61,6 +61,7 @@ void deviceManager(DeviceSolenoid* device) {
 		(*device).activate();
 		return;
 	}
+(*device).activate();
 }
 
 void commManager(DeviceSolenoid* device) {

@@ -11,6 +11,8 @@ OBJETIVOS A ALCANZAR EN VERSION 0.5
 
 3. Unificar las clases en una única carpeta de librerías.
 
+	Se ha creado un directorio /libraries debajo de /rainforgrass que agrupa todas las librerías usadas en el proyecto.
+
 4. Hacer clases derivadas para cada tipo de dispositivo.
 
 5. Poner cabeceras de licencia libre en todas las clases y programas.
@@ -18,3 +20,7 @@ OBJETIVOS A ALCANZAR EN VERSION 0.5
 6. Poner funciones de uso común (p.e. split) en una clase o librería de funciones.
 
 7. Diseñar la etapa de potencia que gobierne directamente la electroválvula.
+
+8. Controlar el apagado y encendido automático del LCD para evitar consumos inútiles cuando no se está usando y se conecte solamente cuando se encuentre alguien operando con él.
+
+9. Implementar en el controller un programa de test de zonas que pruebe una zona tras otra con periodos de funcionamiento por zona de XX segundos.

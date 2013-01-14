@@ -42,11 +42,11 @@ controlar */
 #include "constants.h"
 
 // Inicializamos las variables del programa
-boolean showAction = false;
-byte activeMode = 0;
+  // Variables para control de encendido/apagado display LCD
+boolean lcdDisplayStatus = true;
+long lcdTimeStatus = 0;
+  // Otras variables
 char optionValue[MAX_KEYPAD_ENTRY + 1] = "";
-//MenuOption presentMenuOption;
-//String keypadBuffer;
 Device pDevices[MAX_NUM_DEVICES];
 Devices devices = Devices( pDevices, MAX_NUM_DEVICES );
 RainPComm rainPComm = RainPComm( TX_PIN, RC_PIN, SPEED_COMM, TARGET_NET, SOURCE_DEV);
@@ -65,9 +65,9 @@ Keypad keypad = Keypad( makeKeymap( keys), KEYPAD_ROW_PINS, KEYPAD_COL_PINS, KEY
 // Fin de inicializacion de variables
 
 void setup() {
-  Serial.begin(SERIAL_SPEED);
   // se definen el número de columnas y filas del LCD
   lcd.begin(LCD_COLUMNS, LCD_ROWS);
+  lcdTimeStatus = millis();
 
   // Rellenamos las opciones del menú de la aplicación
   menux.addMenuOption( MenuOption( 1, "MODO MANUAL", 0, 2, "", NO_ACTION));
@@ -104,19 +104,27 @@ void setup() {
 
 void loop() {
 
+  // Si se sobrepasa el tiempo de displayado de datos sin atender el menu, se hace un apagado del display.
+  setOffLCD(&lcd);
 	// Hacemos un delay de DELAY_CHECK_KEYS milisegundos entre consultas de pulsaciones
 	delay(DELAY_CHECK_KEYS);
   // Consultamos si se ha pulsado alguna tecla
 //  char key = keypad.waitForKey();
   char key = keypad.getKey();
+  
+  // Si se ha pulsado una tecla y el display est apagado se procede al encendido del display.
+  if (key != 0 && lcdDisplayStatus == false) {
+      setOnLCD(&lcd);
+      return;
+  }
   if (key != 0) {
 	// Consultamos si se ha pulsado algún botón
 	if (isButtonCancellation(key)) {
-                devices.deactivateAll();
+                devices.deactivateAll(DEACTIVATE_COMMAND);
                 menux.showMenuOption(lcd);
                 setOptionInputText(&menux, "");
 	} else if (isButtonBackRising(key)) {
-                devices.deactivateAll();
+                devices.deactivateAll(DEACTIVATE_COMMAND);
 		goBackMenu();
                 menux.showMenuOption(lcd);
                 setOptionInputText(&menux, "");
@@ -168,7 +176,7 @@ void doAction(MenuOption menuOption, char* value){
 	switch (menuOption.getActionCode()) {
 		case ACTION_ACTIVATE:
 			// Ejecuta acciones para la Action ACTIVATE
-                        if (devices.activateById(atoi(value)) == true ) {
+                        if (devices.activateById(atoi(value), ACTIVATE_COMMAND, DEACTIVATE_COMMAND) == true ) {
                           sendMessage(lcd, 0, 0, "MM_ACT_", value);
                         } else {
                           sendMessage(lcd, 0, 0, "ERROR_DISP_", value);
@@ -176,7 +184,7 @@ void doAction(MenuOption menuOption, char* value){
 			break;
 		case ACTION_DEACTIVATE:
 			// Ejecuta acciones para la Action DEACTIVATE
-                        if (devices.deactivateById(atoi(value)) == true ) {
+                        if (devices.deactivateById(atoi(value), DEACTIVATE_COMMAND) == true ) {
                           sendMessage(lcd, 0, 0, "MM_DACT_", value);
                         } else {
                           sendMessage(lcd, 0, 0, "ERROR_DISP_", value);
@@ -188,10 +196,10 @@ void doAction(MenuOption menuOption, char* value){
                         if (idxDevice >= 0 ) {
                             if ((*(devices.getDevice(idxDevice))).getState() == 0 ) {
                                 sendMessage(lcd, 0, 0, "MM_ACT_", value);
-                                devices.activateById(atoi(value));
+                                devices.activateById(atoi(value), ACTIVATE_COMMAND, DEACTIVATE_COMMAND);
                             } else {
                                 sendMessage(lcd, 0, 0, "MM_DACT_", value);
-                                devices.deactivateById(atoi(value));
+                                devices.deactivateById(atoi(value), DEACTIVATE_COMMAND);
                             }
                         } else {
                           sendMessage(lcd, 0, 0, "ERROR_DISP_", value);
@@ -255,6 +263,19 @@ String getOptionInputText(Menux * menux){
 
 void setOptionInputText(Menux * menux, String text){
   return menux->getPresentMenuOption().getTextInput()->setTextBuffer(text);
+}
+
+void setOffLCD( LiquidCrystal * lcd) {
+  if ( (millis() - lcdTimeStatus) > 5000 && lcdDisplayStatus == true) {
+    lcdDisplayStatus = false;
+    (*lcd).noDisplay();
+  }
+}
+
+void setOnLCD( LiquidCrystal * lcd) {
+  lcdDisplayStatus = true;
+  (*lcd).display();
+  lcdTimeStatus = millis();
 }
 
 

@@ -19,7 +19,7 @@ const unsigned long TARGET_NET = 11111;
 const unsigned int DEVICE_ID = 3;
 const unsigned int CONTROL_DEV = 111;
 
-const unsigned int DELAY_BETWEEN_STATES = 9;      // Miliseconds
+const unsigned int DELAY_BETWEEN_STATES = 5000;      // Miliseconds
 const unsigned int MILLIS_BETWEEN_MESSAGES = 50;  // Miliseconds
 
 const int PIN_ACTIVATION = 13;
