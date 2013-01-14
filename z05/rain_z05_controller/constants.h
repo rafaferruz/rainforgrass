@@ -30,6 +30,9 @@ const byte ACTION_ON_OFF = 3;
 const byte SET_DATE = 41;
 const byte SET_TIME = 42;
 
+char ACTIVATE_COMMAND[4] = "001";
+char DEACTIVATE_COMMAND[4] = "002";
+
 // Definición de parámetros de comunicaciones Serial
 const unsigned long SERIAL_SPEED = 9600;
 

@@ -11,9 +11,9 @@ public:
 	bool removeDevice(Device device);
 	Device* getDevice(byte index);
 	int getDeviceIndex(int id);
-	bool deactivateAll();
-	bool deactivateById(int id);
-	bool activateById(int id);
+	bool deactivateAll(char * deactivateCommand);
+	bool deactivateById(int id, char * deactivateCommand);
+	bool activateById(int id, char * activateCommand, char * deactivateCommand);
 
 private:
 	Device* pDevices;

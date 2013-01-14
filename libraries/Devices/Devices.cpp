@@ -62,11 +62,11 @@ int Devices::getDeviceIndex(int id){
 /*
 	Desactiva todos los dispositivos.
 */ 
-bool Devices::deactivateAll(){
+bool Devices::deactivateAll(char * deactivateCommand){
 	int i = 0;
 	for (i = 0; i < numDevices; i++) {
 		if (pDevices[i].getDeviceId() >= 0 && pDevices[i].getState() == 1 ) {
-			pDevices[i].deactivate();
+			pDevices[i].deactivate(deactivateCommand);
 		}
 	}
 	return true;
@@ -75,11 +75,11 @@ bool Devices::deactivateAll(){
 /*
 	Desactiva el dispositivo cuyo id sea igual al pasado como parámetro.
 */ 
-bool Devices::deactivateById(int id){
+bool Devices::deactivateById(int id, char * deactivateCommand){
 	int i = 0;
 	for (i = 0; i < numDevices; i++) {
 		if (pDevices[i].getDeviceId() == id && pDevices[i].getState() == 1 ) {
-			pDevices[i].deactivate();
+			pDevices[i].deactivate(deactivateCommand);
 			return true;
 		}
 	}
@@ -89,15 +89,15 @@ bool Devices::deactivateById(int id){
 /*
 	Activa el dispositivo cuyo id sea igual al pasado como parámetro.
 */ 
-bool Devices::activateById(int id){
+bool Devices::activateById(int id, char * activateCommand, char * deactivateCommand){
 	// Desactivación general de todos los dispositivos
-	deactivateAll();
+	deactivateAll(deactivateCommand);
 
 	// Activación del dispositivo indicado
 	int i = 0;
 	for (i = 0; i < numDevices; i++) {
 		if (pDevices[i].getDeviceId() == id) {
-			pDevices[i].activate();
+			pDevices[i].activate(activateCommand);
 			return true;
 		}
 	}
