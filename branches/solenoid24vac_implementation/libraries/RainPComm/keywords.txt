@@ -1,0 +1,40 @@
+#######################################
+# Syntax Coloring Map For Debounce
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+RainPComm	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+sendMessage	KEYWORD2
+setTargetNet	KEYWORD2
+setSourceDev	KEYWORD2
+getMessage	KEYWORD2
+
+isRightTxComm	KEYWORD2
+isRightRxComm	KEYWORD2
+prepareAddressBlock	KEYWORD2
+preparePayloadBlock	KEYWORD2
+validateMessage	KEYWORD2
+checkNetworkAddress	KEYWORD2
+checkDeviceAddress	KEYWORD2
+split	KEYWORD2
+
+
+#######################################
+# Instances (KEYWORD2)
+#######################################
+
+#######################################
+# Constants (LITERAL1)
+
+VW_MAX_PAYLOAD	LITERAL1
+VW_MAX_MESSAGE_LEN	LITERAL1
+#######################################
+
