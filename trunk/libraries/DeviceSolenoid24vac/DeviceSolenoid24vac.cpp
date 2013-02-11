@@ -38,6 +38,7 @@ bool DeviceSolenoid24vac::deactivate(){
 	this->state = 0;
 	// Operaciones de desactivación del dispositivo
 	digitalWrite(pinActivation, LOW);
+	digitalWrite(13, LOW);
 	return true;
 }
 
@@ -45,6 +46,7 @@ bool DeviceSolenoid24vac::activate(){
 	this->state = 1;
 	// Operaciones de activación del dispositivo
 	digitalWrite(pinActivation, HIGH);
+	digitalWrite(13, HIGH);
 	return true;
 }
 
