@@ -65,9 +65,9 @@ Keypad keypad = Keypad( makeKeymap( keys), KEYPAD_ROW_PINS, KEYPAD_COL_PINS, KEY
 // Fin de inicializacion de variables
 
 void setup() {
+  Serial.begin(SERIAL_SPEED);
   // se definen el número de columnas y filas del LCD
   lcd.begin(LCD_COLUMNS, LCD_ROWS);
-  lcdTimeStatus = millis();
 
   // Rellenamos las opciones del menú de la aplicación
   menux.addMenuOption( MenuOption( 1, "MODO MANUAL", 0, 2, "", NO_ACTION));
@@ -100,6 +100,10 @@ void setup() {
   devices.addDevice( 2, TARGET_NET, &rainPComm); 
   devices.addDevice( 3, TARGET_NET, &rainPComm); 
   devices.addDevice( 4, TARGET_NET, &rainPComm); 
+  Serial.println("IN SETUP");
+
+  // Activamos el display
+  setOnLCD(&lcd);
 }
 
 void loop() {
@@ -109,7 +113,7 @@ void loop() {
 	// Hacemos un delay de DELAY_CHECK_KEYS milisegundos entre consultas de pulsaciones
 	delay(DELAY_CHECK_KEYS);
   // Consultamos si se ha pulsado alguna tecla
-//  char key = keypad.waitForKey();
+  //char key = keypad.waitForKey();
   char key = keypad.getKey();
   
   // Si se ha pulsado una tecla y el display est apagado se procede al encendido del display.
@@ -118,6 +122,8 @@ void loop() {
       return;
   }
   if (key != 0) {
+    lcdTimeStatus = millis();
+    Serial.println(key);
 	// Consultamos si se ha pulsado algún botón
 	if (isButtonCancellation(key)) {
                 devices.deactivateAll(DEACTIVATE_COMMAND);
@@ -266,7 +272,7 @@ void setOptionInputText(Menux * menux, String text){
 }
 
 void setOffLCD( LiquidCrystal * lcd) {
-  if ( (millis() - lcdTimeStatus) > 5000 && lcdDisplayStatus == true) {
+  if ( ( (millis() - lcdTimeStatus) > (TIME_DISPLAY_OFF * 1000) ) && lcdDisplayStatus == true) {
     lcdDisplayStatus = false;
     (*lcd).noDisplay();
   }

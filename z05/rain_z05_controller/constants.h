@@ -1,7 +1,7 @@
 /*
 constants.h
 
-Constantes utilizadas en el proyecto RAIN_Z02.
+Constantes utilizadas en el proyecto RAIN_Z05.
 */
 
 // Definición de pines para uso del display LCD
@@ -38,10 +38,12 @@ const unsigned long SERIAL_SPEED = 9600;
 
 // Milisegundos entre consultas de estado de teclas
 const byte DELAY_CHECK_KEYS = 50;
+// Segundos sin modificar la informacion del display para su apagado por inactividad
+const unsigned long TIME_DISPLAY_OFF = 20;
 
 // Control del menú de la aplicación
 const byte MENU_START_CODE = 1;
-const String MENU_MAIN_TITLE = "RAIN_Z01";
+const String MENU_MAIN_TITLE = "RAIN_Z05";
 
 // Modos de trabajo del menu
 const byte MANUAL_MODE = 1;
