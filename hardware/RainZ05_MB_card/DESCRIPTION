@@ -1,0 +1,4 @@
+Placa principal del módulo de mando de dispositivos de riego del sistema RainZ05.
+El corazón de la placa es un dispositivo Arduino Pro Mini que contiene el programa de recepción de mensajes de control y manejo de electroválvulas,
+una fuente de alimentación regulada de 5 voltios
+para alimentación de los diferentes circuitos electrónicos y la electrónica de control de una electroválvula master

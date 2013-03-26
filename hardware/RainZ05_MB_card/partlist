@@ -1,0 +1,35 @@
+Partlist
+
+Exported from main_card.sch at 01/02/13 18:08
+
+EAGLE Version 6.3.0 Copyright (c) 1988-2012 CadSoft
+
+Assembly variant: 
+
+Part       Value               Device         Package  Library          Sheet
+
+B2         FB15                FB15           FB15     rectifier        1
+C1         1600 uF 16v.        CPOL-EUE5-13   E5-13    rcl              1
+C2         10 uF 16v. tantalum CPOL-EUTAP5-60 TAP5-60  rcl              1
+F1         100 mA              GSH15          GSH15    fuse             1
+F2         100 mA              GSH15          GSH15    fuse             1
+K1         G2R2A               G2R2A          G2R2A    relay            1
+LM317T     5v.                 LM317TS        317TS    v-reg            1
+PAD1       A                   2,54/1,1       2,54/1,1 wirepad          1
+PAD2       B                   2,54/1,1       2,54/1,1 wirepad          1
+PAD3       WIREPAD1,6/0,8      WIREPAD1,6/0,8 1,6/0,8  wirepad          1
+PAD4       WIREPAD1,6/0,8      WIREPAD1,6/0,8 1,6/0,8  wirepad          1
+PAD5       WIREPAD1,6/0,8      WIREPAD1,6/0,8 1,6/0,8  wirepad          1
+PAD6       WIREPAD1,6/0,8      WIREPAD1,6/0,8 1,6/0,8  wirepad          1
+PAD7       WIREPAD1,6/0,8      WIREPAD1,6/0,8 1,6/0,8  wirepad          1
+PAD8       WIREPAD1,6/0,8      WIREPAD1,6/0,8 1,6/0,8  wirepad          1
+Q1         BD139               BD139          TO126AV  transistor-power 1
+R1         1K                  R-EU_0207/12   0207/12  rcl              1
+R2         330 ohm.            R-EU_0207/12   0207/12  rcl              1
+R3         1K                  R-EU_0207/12   0207/12  rcl              1
+SV1        Comm                FE06-1         FE06     con-lsta         1
+SV2        SV2                 FE12-1         FE12     con-lsta         1
+SV3        SV3                 FE12-1         FE12     con-lsta         1
+SV4        Receiver            FE06-1         FE06     con-lsta         1
+TR1-SEC6V  EI42-1 6vac         EI42-1         EI42-1   trafo            1
+TR2-SEC24V EI42-1 6vac         EI42-1         EI42-1   trafo            1
