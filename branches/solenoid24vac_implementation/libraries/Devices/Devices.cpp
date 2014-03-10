@@ -1,7 +1,15 @@
 #include "Arduino.h"
 #include "Devices.h"
 #include "RainPComm.h"
- 
+
+/* 
+Crea y gestiona una factoría de objetos Device
+
+Parámetros:
+	pDevices	Recibe un apuntador al primer elemento de un array de objetos Device
+	numDevices	Recibe el número de dispositivos que podrá gestionar la factoría
+*/
+
 Devices::Devices(Device * pDevices, int numDevices) {
 	this->pDevices = pDevices;
 	this->numDevices = numDevices;
@@ -10,15 +18,15 @@ Devices::Devices(Device * pDevices, int numDevices) {
 /*
 	Devuelve true si consigue añadir el dispositivo a la lista y false si la lista está llena y no lo puede añadir.
 */ 
-bool Devices::addDevice(int id, int net, RainPComm * rp){
+bool Devices::addDevice(int id, int net, RainPComm * pRainPComm){
 	// Comprobamos que no exista ya el 'id' en la lista
-	if ( this->getDeviceIndex( id ) > -1 ) {
+	if ( this->getDeviceIndex( id ) > NOT_ASSIGNED_DEVICE_CODE ) {
 		return false;
 	}
 	int i = 0;
 	for (i = 0; i < numDevices; i++) {
-		if ( pDevices[i].getDeviceId() == -1) {
-			pDevices[i].initialize( id, net, rp);
+		if ( pDevices[i].getDeviceId() == NOT_ASSIGNED_DEVICE_CODE) {
+			pDevices[i].initialize( id, net, pRainPComm);
 			return true;
 		}
 	}
@@ -32,7 +40,7 @@ bool Devices::removeDevice(Device device){
 	int i = 0;
 	for (i = 0; i < numDevices; i++) {
 		if ( pDevices[i].getDeviceId() == device.getDeviceId() ) {
-			pDevices[i].initialize( -1, -1); 
+			pDevices[i].initialize( NOT_ASSIGNED_DEVICE_CODE, NOT_ASSIGNED_NET_CODE); 
 			return true;
 		}
 	}
@@ -65,7 +73,7 @@ int Devices::getDeviceIndex(int id){
 bool Devices::deactivateAll(char * deactivateCommand){
 	int i = 0;
 	for (i = 0; i < numDevices; i++) {
-		if (pDevices[i].getDeviceId() >= 0 && pDevices[i].getState() == 1 ) {
+		if (pDevices[i].getDeviceId() >= NOT_ASSIGNED_DEVICE_CODE && pDevices[i].getState() == INACTIVE_DEVICE ) {
 			pDevices[i].deactivate(deactivateCommand);
 		}
 	}
@@ -78,7 +86,7 @@ bool Devices::deactivateAll(char * deactivateCommand){
 bool Devices::deactivateById(int id, char * deactivateCommand){
 	int i = 0;
 	for (i = 0; i < numDevices; i++) {
-		if (pDevices[i].getDeviceId() == id && pDevices[i].getState() == 1 ) {
+		if (pDevices[i].getDeviceId() == id && pDevices[i].getState() == ACTIVE_DEVICE ) {
 			pDevices[i].deactivate(deactivateCommand);
 			return true;
 		}

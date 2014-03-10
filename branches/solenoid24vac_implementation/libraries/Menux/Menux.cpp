@@ -88,24 +88,24 @@ byte Menux::searchNextOption(byte fromOption, byte menuCodeToSearch) {
 	return fromOption;
 }
 
-void Menux::showMenuOption(LiquidCrystal &lcd) {
+void Menux::showMenuOption(LiquidCrystal * lcd) {
 	// Se envía al display el título del grupo de MenuOptions	
-	lcd.clear();
+	lcd->clear();
 	if (presentMenuCode == 1) {
 		titleMenuOption = "Menu General";
 	}
-//	lcd.setCursor(0, 0);
-//	lcd.print(titleMenuOption);
+//	lcd->setCursor(0, 0);
+//	lcd->print(titleMenuOption);
 	// Se envía al display la MenuOption actual
-	lcd.setCursor(0, 1);
-	lcd.print(menuOptionList[presentOption].getOptionText());
+	lcd->setCursor(0, 1);
+	lcd->print(menuOptionList[presentOption].getOptionText());
 	return;
 }
 
-void Menux::showMenuOption(LiquidCrystal &lcd, String value) {
+void Menux::showMenuOption(LiquidCrystal * lcd, String value) {
 	showMenuOption(lcd);
 	// Se envía al display el valor adicional a mostrar
-	lcd.print(" " + value);
+	lcd->print(" " + value);
 	return;
 }
 
