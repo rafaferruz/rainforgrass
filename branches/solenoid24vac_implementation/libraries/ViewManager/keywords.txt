@@ -1,0 +1,33 @@
+#######################################
+# Syntax Coloring Map For Debounce
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+KeyManager	 KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+setMenuCode	KEYWORD2
+setOptionText	KEYWORD2
+setMenuNextCode	KEYWORD2
+setMenuBackCode	KEYWORD2
+setDefaultValue	KEYWORD2
+getMenuCode	KEYWORD2
+getOptionText	KEYWORD2
+getMenuNextCode	KEYWORD2
+getMenuBackCode	KEYWORD2
+getDefaultValue	KEYWORD2
+
+#######################################
+# Instances (KEYWORD2)
+#######################################
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
