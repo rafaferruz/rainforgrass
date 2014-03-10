@@ -3,6 +3,7 @@
 
 #include "Arduino.h"
 #include "LiquidCrystal.h"
+#include "MenuOption.h"
  
 class Menux {
 public:
@@ -19,8 +20,8 @@ public:
 	byte goNextOption(byte indexOption);
 	char* getSelectOptionValue(byte indexOption);
 	byte searchNextOption(byte fromOption, byte menuCodeToSearch);
-	void showMenuOption(LiquidCrystal &lcd);
-	void showMenuOption(LiquidCrystal &lcd, String value);
+	void showMenuOption(LiquidCrystal * lcd);
+	void showMenuOption(LiquidCrystal * lcd, String value);
   
 private:
 	MenuOption menuOptionList[10];

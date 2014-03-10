@@ -1,10 +1,17 @@
 #include "Arduino.h"
 #include "Device.h"
+
+/* 
+Crea un objeto Device con sus valores iniciales
+
+Parámetros:
+	ninguno
+*/
  
 Device::Device() :
-	deviceId( -1 ),
-	netCode( -1 ),
-	state(0)
+	deviceId( NOT_ASSIGNED_DEVICE_CODE ),
+	netCode( NOT_ASSIGNED_NET_CODE ),
+	state(INACTIVE_DEVICE)
 { }
 
 /*
@@ -28,10 +35,10 @@ Parámetros:
 	RainPComm *	Puntero referencia al objeto de protocolo de comunicaciones de tipo RainPComm
 	
 */
-void Device::initialize(int id, int  net, RainPComm * rp) {
+void Device::initialize(int id, int  net, RainPComm * pProtocol) {
 	this->deviceId = id ;
 	this->netCode = net ;
-	this->rp = rp ;
+	this->pProtocol = pProtocol ;
 }
 
 /*
@@ -74,8 +81,8 @@ Devuelve:	true	La orden se ha enviado correctamente.
 */
 bool Device::deactivate(char * command){
 	// Operaciones de desactivación del dispositivo
-	if ((*rp).sendMessage(this->deviceId, command)) {
-		this->state = 0;
+	if ((*pProtocol).sendMessage(this->deviceId, command)) {
+		this->state = INACTIVE_DEVICE;
 		return true;
 	}
 	return false;
@@ -91,8 +98,8 @@ Devuelve:	true	La orden se ha enviado correctamente.
 */
 bool Device::activate(char * command){
 	// Operaciones de activación del dispositivo
-	if ((*rp).sendMessage(this->deviceId, command)) {
-		this->state = 1;
+	if ((*pProtocol).sendMessage(this->deviceId, command)) {
+		this->state = ACTIVE_DEVICE;
 		return true;
 	}
 	return false;

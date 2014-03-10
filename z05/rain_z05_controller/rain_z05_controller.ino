@@ -15,8 +15,23 @@ en la memoria flash */
 // La librera TextInput permite crear objetos que chequean y gestionan los datos entrados a traves del keypad
 #include <TextInput.h>
 
+// Se utiliza un fichero de configuración externo para aportar los estados iniciales.
+#include "constants.h"
+
+// La librera KeyManager permite crear un objeto KeyManager que ser el responsable de gestionar el mod de funcionamiento
+// del teclado de entrada de datos y ordenes del sistema
+#include <KeyManager.h>
+
+// La librera ViewManager permite crear un objeto ViewManager que sera el responsable de gestionar la visualizacion
+// de menus, datos entrados y mensajes por medio de un display LCD
+#include <ViewManager.h>
+
+// La librera ProcessManager permite crear un objeto ProcessManager que sera el Controller en el patron MVC
+#include <ProcessManager.h>
+
 // La librería Bounce nos proporciona funcionalidad para comprobar el estado de los botones de control de la aplicación.
 #include <Bounce.h>
+
 // Se utiliza la librería LiquidCrystal.h para controlar el display LCD
 #include "LiquidCrystal.h"
 
@@ -29,6 +44,7 @@ en la memoria flash */
 #include <Device.h>
 
 
+
 /* La librera VirtualWire proporciona soporte para las comunicaciones entre el controlador central y los dispositivos a 
 controlar */
 #include <VirtualWire.h>
@@ -37,37 +53,46 @@ controlar */
 
 
 
-
-// Se utiliza un fichero de configuración externo para aportar los estados iniciales.
-#include "constants.h"
-
 // Inicializamos las variables del programa
   // Variables para control de encendido/apagado display LCD
 boolean lcdDisplayStatus = true;
 long lcdTimeStatus = 0;
   // Otras variables
-char optionValue[MAX_KEYPAD_ENTRY + 1] = "";
-Device pDevices[MAX_NUM_DEVICES];
-Devices devices = Devices( pDevices, MAX_NUM_DEVICES );
-RainPComm rainPComm = RainPComm( TX_PIN, RC_PIN, SPEED_COMM, TARGET_NET, SOURCE_DEV);
+Device arrayDevices[MAX_NUM_DEVICES];
+Devices * pDevices = new Devices( arrayDevices, MAX_NUM_DEVICES );
+RainPComm * pRainPComm = new RainPComm( TX_PIN, RC_PIN, SPEED_COMM, TARGET_NET, SOURCE_DEV);
+RainPComm & rRainPComm = *pRainPComm;
 
-
-LiquidCrystal lcd(LCD_REGISTER_SELECT, LCD_ENABLE, LCD_DB4, LCD_DB5, LCD_DB6, LCD_DB7);
-
+LiquidCrystal * pLcd = new LiquidCrystal(LCD_REGISTER_SELECT, LCD_ENABLE, LCD_DB4, LCD_DB5, LCD_DB6, LCD_DB7);
+LiquidCrystal & rLcd = *pLcd;
 
 // Creamos un objeto para controlar el menú de opciones
 Menux menux = Menux();
 
 // Creamos un objeto para controlar entrada de ordenes desde un keypad
 char keys[KEYPAD_ROWS][KEYPAD_COLUMNS];
-Keypad keypad = Keypad( makeKeymap( keys), KEYPAD_ROW_PINS, KEYPAD_COL_PINS, KEYPAD_ROWS, KEYPAD_COLUMNS); 
+Keypad * pKeypad = new Keypad( makeKeymap( keys), KEYPAD_ROW_PINS, KEYPAD_COL_PINS, KEYPAD_ROWS, KEYPAD_COLUMNS); 
+Keypad & rKeypad = *pKeypad;
+
+// Creamos un objeto responsable de gestionar el teclado por el que se reciben los datos del usuario
+KeyManager * pKeyManager = new KeyManager(pKeypad);
+KeyManager & rKeyManager = *pKeyManager;
+
+// Creamos un objeto responsable de mostrar informacin al usuario
+ViewManager * pViewManager = new ViewManager(pLcd);
+ViewManager & rViewManager = *pViewManager;
+
+// Creamos un objeto responsable de recibir datos de los dispositivos de entrada, procesar los datos y enviar
+// datos o acciones a realizar a los dispositivos de salida
+ProcessManager * pProcessManager = new ProcessManager(pKeyManager, pViewManager);
+ProcessManager & rProcessManager = *pProcessManager;
 
 // Fin de inicializacion de variables
 
 void setup() {
   Serial.begin(SERIAL_SPEED);
   // se definen el número de columnas y filas del LCD
-  lcd.begin(LCD_COLUMNS, LCD_ROWS);
+  rLcd.begin(LCD_COLUMNS, LCD_ROWS);
 
   // Rellenamos las opciones del menú de la aplicación
   menux.addMenuOption( MenuOption( 1, "MODO MANUAL", 0, 2, "", NO_ACTION));
@@ -77,14 +102,11 @@ void setup() {
   menux.addMenuOption( MenuOption( 1, "MODO CONFIG.", 0, 4, "", NO_ACTION));
   menux.addMenuOption( MenuOption( 4, "Fecha:", 1, 4, "", SET_DATE, new TextInput(8, "########", CHECK_DATE)));
   menux.addMenuOption( MenuOption( 4, "Hora:", 1, 0, "", SET_TIME, new TextInput(6, "######", CHECK_TIME)));
+  // Pasamos la definicin del servicio de navegacion al objeto ViewManager
+  rViewManager.setMenux(&menux);
+  // Se arranca el servicio de navegacion
+  rViewManager.startMenux();
 
-  // Definimos el código del menú inicial a mostrar
-  menux.setPresentMenuCode(MENU_START_CODE);
-  menux.setTitleMenuOption(MENU_MAIN_TITLE);
-
-//  menux.searchNextOption( 0, MENU_START_CODE);
-  menux.showMenuOption(lcd);
-  
   // Inicializacin del keypad
   int i, j;
   for (i = 0; i < KEYPAD_ROWS; i++) {
@@ -93,158 +115,44 @@ void setup() {
     }
   }
   // Creamos una instancia de la clase Keypad
-  keypad.begin( makeKeymap( keys)); 
+  rKeyManager.getKeypad()->begin( makeKeymap( keys)); 
  
   // Inicializamos los dispositivos
-  devices.addDevice( 1, TARGET_NET, &rainPComm); 
-  devices.addDevice( 2, TARGET_NET, &rainPComm); 
-  devices.addDevice( 3, TARGET_NET, &rainPComm); 
-  devices.addDevice( 4, TARGET_NET, &rainPComm); 
+  pDevices->addDevice( 1, TARGET_NET, pRainPComm); 
+  pDevices->addDevice( 2, TARGET_NET, pRainPComm); 
+  pDevices->addDevice( 3, TARGET_NET, pRainPComm); 
+  pDevices->addDevice( 4, TARGET_NET, pRainPComm); 
+  // Pasa la lista de dispositivos a ProcessManager
+  rProcessManager.setDevices(pDevices);
+  
   Serial.println("IN SETUP");
 
   // Activamos el display
-  setOnLCD(&lcd);
+  setOnLCD(rLcd);
 }
 
 void loop() {
 
   // Si se sobrepasa el tiempo de displayado de datos sin atender el menu, se hace un apagado del display.
-  setOffLCD(&lcd);
+  setOffLCD(rLcd);
 	// Hacemos un delay de DELAY_CHECK_KEYS milisegundos entre consultas de pulsaciones
 	delay(DELAY_CHECK_KEYS);
-  // Consultamos si se ha pulsado alguna tecla
-  //char key = keypad.waitForKey();
-  char key = keypad.getKey();
+  // Consultamos estado del teclado si se ha pulsado alguna tecla
+  char keySignal = rKeyManager.getSignal();
   
   // Si se ha pulsado una tecla y el display est apagado se procede al encendido del display.
-  if (key != 0 && lcdDisplayStatus == false) {
-      setOnLCD(&lcd);
-      return;
+  if (keySignal != 0 && lcdDisplayStatus == false) {
+      setOnLCD(rLcd);
   }
-  if (key != 0) {
+  if (keySignal != 0) {
     lcdTimeStatus = millis();
-    Serial.println(key);
-	// Consultamos si se ha pulsado algún botón
-	if (isButtonCancellation(key)) {
-                devices.deactivateAll(DEACTIVATE_COMMAND);
-                menux.showMenuOption(lcd);
-                setOptionInputText(&menux, "");
-	} else if (isButtonBackRising(key)) {
-                devices.deactivateAll(DEACTIVATE_COMMAND);
-		goBackMenu();
-                menux.showMenuOption(lcd);
-                setOptionInputText(&menux, "");
-	} else if (isButtonOptionRising(key)) {
-		goNextOption();
-                menux.showMenuOption(lcd);
-                setOptionInputText(&menux, "");
-	} else if (isButtonSelectRising(key)) {
-		// Recibimos el valor de la opción validada o un valor vacío si se trata de navegación a submenú
-		if ( menux.getPresentMenuOption().getActionCode() != NO_ACTION ) {
-                  if (getOptionInputText(&menux) != "" ) {
-                    Serial.println(menux.getPresentMenuOption().getTextInput()->matchTextBuffer());
-                    if (menux.getPresentMenuOption().getTextInput()->matchTextBuffer() == false ) {
-// DEBEMOS GUARDAR EL VALOR ENTRADO
-                      getOptionInputText(&menux).toCharArray(optionValue,getOptionInputText(&menux).length()+1);
-                      menux.showMenuOption(lcd);
-                      setOptionInputText(&menux, "");
-                      sendMessage(lcd, 0, 0, "ERR_IN:", optionValue);
-                      return;
-                    }
-                    getOptionInputText(&menux).toCharArray(optionValue,getOptionInputText(&menux).length()+1);
-                  } else {
-                    strcpy(optionValue, getSelectOptionValue());
-                  }
-        		if (optionValue != "") {
-                                menux.showMenuOption(lcd);
-                                setOptionInputText(&menux, "");
-        			doAction(menux.getPresentMenuOption(), optionValue);
-        		}
-                } else {
-                  menux.searchNextOption(menux.getPresentOption(), menux.getPresentMenuOption().getMenuNextCode());
-                  menux.showMenuOption(lcd);
-                  setOptionInputText(&menux, "");
-                }
-
-
-	} else {
-                if (menux.getPresentMenuOption().getActionCode() != NO_ACTION) {
-                  menux.getPresentMenuOption().getTextInput()->addChar(key);
-                  menux.showMenuOption(lcd, getOptionInputText(&menux));
-                }
-        }
+    Serial.println(keySignal);
+	// Consultamos si KeyManager desea pasar informacin a ProcessManager
+        rProcessManager.processKeySignal(keySignal);
                 
   }
 }
 
-void doAction(MenuOption menuOption, char* value){
-        int idxDevice = 0;
-	switch (menuOption.getActionCode()) {
-		case ACTION_ACTIVATE:
-			// Ejecuta acciones para la Action ACTIVATE
-                        if (devices.activateById(atoi(value), ACTIVATE_COMMAND, DEACTIVATE_COMMAND) == true ) {
-                          sendMessage(lcd, 0, 0, "MM_ACT_", value);
-                        } else {
-                          sendMessage(lcd, 0, 0, "ERROR_DISP_", value);
-                        }
-			break;
-		case ACTION_DEACTIVATE:
-			// Ejecuta acciones para la Action DEACTIVATE
-                        if (devices.deactivateById(atoi(value), DEACTIVATE_COMMAND) == true ) {
-                          sendMessage(lcd, 0, 0, "MM_DACT_", value);
-                        } else {
-                          sendMessage(lcd, 0, 0, "ERROR_DISP_", value);
-                        }
-			break;
-		case ACTION_ON_OFF:
-			// Ejecuta acciones para la Action ON_OFF
-                        idxDevice = devices.getDeviceIndex(atoi(value));
-                        if (idxDevice >= 0 ) {
-                            if ((*(devices.getDevice(idxDevice))).getState() == 0 ) {
-                                sendMessage(lcd, 0, 0, "MM_ACT_", value);
-                                devices.activateById(atoi(value), ACTIVATE_COMMAND, DEACTIVATE_COMMAND);
-                            } else {
-                                sendMessage(lcd, 0, 0, "MM_DACT_", value);
-                                devices.deactivateById(atoi(value), DEACTIVATE_COMMAND);
-                            }
-                        } else {
-                          sendMessage(lcd, 0, 0, "ERROR_DISP_", value);
-                        }
-			break;
-		default:
-			// Ejecuta otras acciones cuando no se ha definido una Action definida
-			break;
-	}
-
-}
-
-void goBackMenu() {
-	menux.goBackMenu(menux.getPresentOption());
-}
-
-void goNextOption() {
-	menux.goNextOption(menux.getPresentOption());
-}
-
-char* getSelectOptionValue() {
-	return menux.getSelectOptionValue(menux.getPresentOption());
-}
-
-bool isButtonCancellation(char key) {
-  return key == '*';
-}
-
-bool isButtonBackRising(char key) {
-  return key == '#';
-}
-
-bool isButtonOptionRising(char key) {
-  return key == 'B';
-}
-
-bool isButtonSelectRising(char key) {
-  return key == 'D';
-}
 
 void deactivateDevice(char* device) {
   // deactivate action del dispositivo
@@ -253,34 +161,17 @@ void deactivateDevice(char* device) {
 void deactivateAllDevices() {
 }
 
-/*
-  Envía un mensaje a un dispositivo LiquidCrystal colocandolo a partir de la fila y columna indicada en los parmetros
-  y concatenando las cadenas messageCode y value.
-*/
-void sendMessage(LiquidCrystal lcd, int column, int row, String messageCode, char* value) {
-  lcd.setCursor( column, row);
-  messageCode.concat(value);
-  lcd.print(messageCode);
-}
 
-String getOptionInputText(Menux * menux){
-  return menux->getPresentMenuOption().getTextInput()->getTextBuffer();
-}
-
-void setOptionInputText(Menux * menux, String text){
-  return menux->getPresentMenuOption().getTextInput()->setTextBuffer(text);
-}
-
-void setOffLCD( LiquidCrystal * lcd) {
+void setOffLCD( LiquidCrystal & lcd) {
   if ( ( (millis() - lcdTimeStatus) > (TIME_DISPLAY_OFF * 1000) ) && lcdDisplayStatus == true) {
     lcdDisplayStatus = false;
-    (*lcd).noDisplay();
+    lcd.noDisplay();
   }
 }
 
-void setOnLCD( LiquidCrystal * lcd) {
+void setOnLCD( LiquidCrystal & lcd) {
   lcdDisplayStatus = true;
-  (*lcd).display();
+  lcd.display();
   lcdTimeStatus = millis();
 }
 
