@@ -18,19 +18,22 @@ RainPComm::RainPComm(byte txPin, byte rxPin, unsigned int speedComm, unsigned lo
 	targetNet (targetNet),
 	sourceDev (sourceDev),
 	blockCounter(0),
+	stateTxComm(0),
+	stateRxComm(0),
 	command("")
 	{ }
 
-bool RainPComm::sendMessage(int targetDev, char* command){
+bool RainPComm::sendMessage(int targetDevice, char* command){
 	String completeMsg = "";
 	unsigned int startPosition = 0;
 	char partOfMsg[VW_MAX_PAYLOAD];
 	if ( !isRightTxComm() ){
 		return false;
 	}
-	completeMsg = prepareAddressBlock(targetDev);
+	completeMsg = prepareAddressBlock(targetDevice);
 	completeMsg.toCharArray(partOfMsg, completeMsg.length()+1);
 	// Llamada a la librería VirtualWire para transmisión del paquete de direcciones
+delay(50);
 Serial.println(completeMsg);
 	if ( vw_send( (uint8_t*)partOfMsg, (uint8_t)completeMsg.length()) == false) {
 		return false;
@@ -38,6 +41,7 @@ Serial.println(completeMsg);
 	completeMsg = preparePayloadBlock(command);
 	completeMsg.toCharArray(partOfMsg, completeMsg.length()+1);
 	// Llamada a la librería VirtualWire para transmisión del paquete de comando o payload
+delay(50);
 Serial.println(completeMsg);
 	if ( vw_send( (uint8_t*)partOfMsg, (uint8_t)completeMsg.length()) == false) {
 		return false;
@@ -60,7 +64,6 @@ String RainPComm::getMessage(unsigned int deviceId){
 		okMsg = vw_get_message( (uint8_t*)readBuffer, (uint8_t*)pPayload );
 		if (okMsg) {
 			completeMsg = readBuffer;
-Serial.println(completeMsg);
 			if ( validateMessage( completeMsg, deviceId ) ) {
 				Serial.println( deviceId );
 				Serial.println( this->command );
@@ -73,6 +76,10 @@ Serial.println(completeMsg);
 	return completeMsg;
 }
 
+bool RainPComm::startTxComm() {
+	return isRightTxComm();
+}
+
 void RainPComm::setTargetNet(unsigned long targetNet){
 	this->targetNet = targetNet;
 }
@@ -82,11 +89,13 @@ void RainPComm::setSourceDev(unsigned int sourceDev){
 }
 
 bool RainPComm::isRightTxComm(){
+
 	if ( stateTxComm == 0 ) {
 		if (txPin > 0 && speedComm > 0) {
 			//  Llamada a la librería VirtualWire para setup de Comm y activación del transmiter
 			vw_set_tx_pin( txPin );
 			vw_setup( speedComm );
+
 			stateTxComm = 1;
 		} else {
 			return false;
@@ -110,7 +119,7 @@ bool RainPComm::isRightRxComm(){
 	return true;
 }
 
-String RainPComm::prepareAddressBlock(unsigned int targetDev){
+String RainPComm::prepareAddressBlock(unsigned int targetDevice){
 	String message = "#";
 	// Incluimos el número de bloque
 	if (blockCounter > 64000) {
@@ -125,7 +134,7 @@ String RainPComm::prepareAddressBlock(unsigned int targetDev){
 	message.concat(targetNet);
 	message.concat("#");
 	// Incluimos el Dispositivo de Destino
-	message.concat(targetDev);
+	message.concat(targetDevice);
 	message.concat("#");
 	// Incluimos el Dispositivo de Origen
 	message.concat(sourceDev);

@@ -13,15 +13,14 @@ public:
 	byte getPresentOption();
 	void setPresentMenuCode(byte menuCode);
 	byte getPresentMenuCode();
-	MenuOption getPresentMenuOption();
+	MenuOption * getPresentMenuOption();
 	void setTitleMenuOption(String title);
 	String getTitleMenuOption();
-	byte goBackMenu(byte indexOption);
-	byte goNextOption(byte indexOption);
-	char* getSelectOptionValue(byte indexOption);
-	byte searchNextOption(byte fromOption, byte menuCodeToSearch);
-	void showMenuOption(LiquidCrystal * lcd);
-	void showMenuOption(LiquidCrystal * lcd, String value);
+	MenuOption * goBackOption();
+	MenuOption * goFollowOption();
+	char* getSelectOptionValue();
+	MenuOption * goNextOption();
+	MenuOption * goPreviousOption();
   
 private:
 	MenuOption menuOptionList[10];

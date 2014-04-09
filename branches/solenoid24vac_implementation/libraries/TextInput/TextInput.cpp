@@ -42,6 +42,17 @@ bool TextInput::addChar(char key){
 	return false;
 }
 
+bool TextInput::removeLastChar(){
+	if (this->textBuffer.length() > 1) {
+	        this->textBuffer = this->textBuffer.substring(0, (this->textBuffer.length() - 1) );
+		return true;
+	} else if (this->textBuffer.length() <= 1) {
+	        this->textBuffer = "";
+		return true;
+	}
+	return false;
+}
+
 const bool TextInput::matchTextBuffer(){
 	if (this->pattern == "") {
 		return true;
@@ -50,7 +61,7 @@ const bool TextInput::matchTextBuffer(){
 	} else if (this->pattern == "*$") {
 		return textBufferAllAlphabetics(textBuffer);
 	} else {
-Serial.println("Salgo por aquí");
+Serial.println("Salgo en TextInput::matchTextBuffer()");
 		return textBufferMatchMixed(textBuffer);
 	}
 	return false;
@@ -100,7 +111,8 @@ const bool TextInput::textBufferMatchMixed(String text) {
 	CHECK_DATE	Comprueba que textBuffer es una fecha válida. El dato a comprobar debe contener
 			8 dígitos numéricos y cumplir que el año sea igual o mayor a 1970 y que el día
 			y el mes son válidos para el año indicado. Se tomaran los dos primeros dígitos
-			como el día (deberá rellenarse con 0 a la izquierda si fuera preciso), los 				dígitos 3 y 4 representan el mes y los cuatro últimos dígitos son el año. El
+			como el día (deberá rellenarse con 0 a la izquierda si fuera preciso), los
+			dígitos 3 y 4 representan el mes y los cuatro últimos dígitos son el año. El
 			formato será, por tanto, ddmmyyyy.
 
 */
@@ -113,55 +125,53 @@ const bool TextInput::matchCheckCode(){
 	int minute = 0;
 	int second = 0;
 			 
-	switch (checkCode) {
-		case NOTHING_TO_DO:
-			return true;
-		case CHECK_DATE:
-			textBuffer.substring(4, 8).toCharArray(cBuf,5);
-			if (( atoi(cBuf) < 1970) || 
-				( atoi(cBuf) > 2049)) {
-				return false;
-			}
-			year = atoi(cBuf);
-			textBuffer.substring(2, 4).toCharArray(cBuf,3);
-			if (( atoi(cBuf) < 1) || 
-				( atoi(cBuf) > 12)) {
-				return false;
-			}
-			month = atoi(cBuf);
-			textBuffer.substring(0, 2).toCharArray(cBuf,3);
-			if (( atoi(cBuf) < 1) ) {
-				return false;
-			}
-			day = atoi(cBuf);
-			if ( ((month == 1 || month == 3 || month == 5 || month == 7 || month == 8 || month == 10 || month == 12 ) && day > 31 ) ||
-				((month == 4 || month == 6 || month == 9 || month == 11 ) && day > 30 ) ||
-			 	(month == 2 &&  day > 29 ) ||
-				(month == 2 && year % 4 > 0 && day > 28) ) {
-				return false;
-			}
-			return true;
-		case CHECK_TIME:
-			textBuffer.substring(0, 2).toCharArray(cBuf,3);
-			if (( atoi(cBuf) < 0) || 
-				( atoi(cBuf) > 23)) {
-				return false;
-			}
-			hour = atoi(cBuf);
-			textBuffer.substring(2, 4).toCharArray(cBuf,3);
-			if (( atoi(cBuf) < 0) || 
-				( atoi(cBuf) > 59)) {
-				return false;
-			}
-			minute = atoi(cBuf);
-			textBuffer.substring(4, 6).toCharArray(cBuf,3);
-			if (( atoi(cBuf) < 0) || 
-				( atoi(cBuf) > 59)) {
-				return false;
-			}
-			second = atoi(cBuf);
-			return true;
-		default:
-			return false;			
+	if (checkCode == NOTHING_TO_DO) {
+		return true;
+	} else if (checkCode == CHECK_DATE) {
+		textBuffer.substring(4, 8).toCharArray(cBuf,5);
+		if (( atoi(cBuf) < 1970) || 
+			( atoi(cBuf) > 2049)) {
+			return false;
+		}
+		year = atoi(cBuf);
+		textBuffer.substring(2, 4).toCharArray(cBuf,3);
+		if (( atoi(cBuf) < 1) || 
+			( atoi(cBuf) > 12)) {
+			return false;
+		}
+		month = atoi(cBuf);
+		textBuffer.substring(0, 2).toCharArray(cBuf,3);
+		if (( atoi(cBuf) < 1) ) {
+			return false;
+		}
+		day = atoi(cBuf);
+		if ( ((month == 1 || month == 3 || month == 5 || month == 7 || month == 8 || month == 10 || month == 12 ) && day > 31 ) ||
+			((month == 4 || month == 6 || month == 9 || month == 11 ) && day > 30 ) ||
+		 	(month == 2 &&  day > 29 ) ||
+			(month == 2 && year % 4 > 0 && day > 28) ) {
+			return false;
+		}
+		return true;
+	} else if (checkCode == CHECK_TIME) {
+		textBuffer.substring(0, 2).toCharArray(cBuf,3);
+		if (( atoi(cBuf) < 0) || 
+			( atoi(cBuf) > 23)) {
+			return false;
+		}
+		hour = atoi(cBuf);
+		textBuffer.substring(2, 4).toCharArray(cBuf,3);
+		if (( atoi(cBuf) < 0) || 
+			( atoi(cBuf) > 59)) {
+			return false;
+		}
+		minute = atoi(cBuf);
+		textBuffer.substring(4, 6).toCharArray(cBuf,3);
+		if (( atoi(cBuf) < 0) || 
+			( atoi(cBuf) > 59)) {
+			return false;
+		}
+		second = atoi(cBuf);
+		return true;
 	}
+	return false;			
 }

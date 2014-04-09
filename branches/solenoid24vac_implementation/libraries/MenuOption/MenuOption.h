@@ -7,8 +7,8 @@
 class MenuOption {
 public:
 	MenuOption() ;
-	MenuOption(byte, char* optionText, byte menuBackCode, byte menuNextCode, char* defaultValue, byte actionCode) ;
-	MenuOption(byte, char* optionText, byte menuBackCode, byte menuNextCode, char* defaultValue, byte actionCode, TextInput * textInput) ;
+	MenuOption(byte menuCode, char* optionText, byte menuBackCode, byte menuNextCode, char* defaultValue, byte actionCode) ;
+	MenuOption(byte menuCode, char* optionText, byte menuBackCode, byte menuNextCode, char* defaultValue, byte actionCode, TextInput * textInput) ;
  
 	void setMenuCode(byte menuCode) ;
 	void setOptionText(char* optionText) ;

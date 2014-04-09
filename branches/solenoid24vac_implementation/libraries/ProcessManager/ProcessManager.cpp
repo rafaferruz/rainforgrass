@@ -1,46 +1,41 @@
 #include "ProcessManager.h"
 
-/*
-Constantes utilizadas en la clase ProcessManager
-*/
-// Definiciones de acciones a ejecutar. El número entero es el que debe codificarse en el campo actionCode de MenuOption.
-const byte ProcessManager::NO_ACTION = 0;
-const byte ProcessManager::ACTION_ACTIVATE = 1;
-const byte ProcessManager::ACTION_DEACTIVATE = 2;
-const byte ProcessManager::ACTION_ON_OFF = 3;
-const byte ProcessManager::SET_DATE = 41;
-const byte ProcessManager::SET_TIME = 42;
 
 char ProcessManager::ACTIVATE_COMMAND[4] = "001";
 char ProcessManager::DEACTIVATE_COMMAND[4] = "002";
 
 
-// Configuracin de dispositivos
-const int ProcessManager::MAX_NUM_DEVICES = 4;  // Mximo nmero de dispositivos que se pueden usar
-const int ProcessManager::NOT_ASSIGNED_DEVICE_CODE = -1;  // Cdigo de dispositivo para dispositivos sin asignar
-const int ProcessManager::NOT_ASSIGNED_NET_CODE = -1;  // Cdigo de red sin asignar
-const int ProcessManager::ACTIVE_DEVICE = 1;  // Dispositivo activo
-const int ProcessManager::INACTIVE_DEVICE = 0; // Dispositivo inactivo
-
-
-/* Se crea un objeto ProcessManager pasando como parámetros los objetos KeyManager, ViewManager
+/* Se crea un objeto ProcessManager pasando como parámetros los objetos UserFacade
 *
 * Parámetros:
-*	keyManager	Objeto KeyManager del contexto
-*	viewManager	Objeto ViewManager del contexto
+*	pUserFacade	Objeto UserFacade del contexto
 */ 
-ProcessManager::ProcessManager(KeyManager * pKeyManager, ViewManager * pViewManager) {
-	this->pKeyManager = pKeyManager;
-	this->pViewManager = pViewManager;
+ProcessManager::ProcessManager(UserFacade * pUserFacade) {
+	this->pUserFacade = pUserFacade;
 }
 
 ProcessManager::~ProcessManager() {
 }
 
+void ProcessManager::startServices() {
+	pUserFacade->startServices();
+}
+
+void ProcessManager::processLifeCycle(){
+	// Fase de interacción con el usuario
+	pUserFacade->userFacadeLifeCycle();
+	// Si recibe orden de ejecutar una acción
+	if (pUserFacade->getSignalAction() != NO_ACTION) {
+		doAction(pUserFacade->getSignalAction(), pUserFacade->getText());
+		delay(3000);
+		pUserFacade->reDisplayMenuOption();
+	}
+}
+
 void ProcessManager::setDevices(Devices * pDevices) {
 	this->pDevices = pDevices;
 }
-
+/*
 void ProcessManager::processKeySignal(char key){
 	if (isButtonCancellation(key)) {
                 pDevices->deactivateAll(DEACTIVATE_COMMAND);
@@ -110,45 +105,38 @@ void ProcessManager::doOnActionCode() {
                 pViewManager->setOptionInputText("");
         }
 }
-
-void ProcessManager::doAction(byte actionCode, char* value){
-        int idxDevice = 0;
-	switch (actionCode) {
-		case ACTION_ACTIVATE:
-			// Ejecuta acciones para la Action ACTIVATE
-                        if (pDevices->activateById(atoi(value), ACTIVATE_COMMAND, DEACTIVATE_COMMAND) == true ) {
-                          pViewManager->sendMessage(pViewManager->getLcd(), 0, 0, "MM_ACT_", value);
-                        } else {
-                          pViewManager->sendMessage(pViewManager->getLcd(), 0, 0, "ERROR_DISP_", value);
-                        }
-			break;
-		case ACTION_DEACTIVATE:
-			// Ejecuta acciones para la Action DEACTIVATE
-                        if (pDevices->deactivateById(atoi(value), DEACTIVATE_COMMAND) == true ) {
-                          pViewManager->sendMessage(pViewManager->getLcd(), 0, 0, "MM_DACT_", value);
-                        } else {
-                          pViewManager->sendMessage(pViewManager->getLcd(), 0, 0, "ERROR_DISP_", value);
-                        }
-			break;
-		case ACTION_ON_OFF:
-			// Ejecuta acciones para la Action ON_OFF
-                        idxDevice = pDevices->getDeviceIndex(atoi(value));
-                        if (idxDevice >= 0 ) {
-                            if ((pDevices->getDevice(idxDevice))->getState() == INACTIVE_DEVICE ) {
-                                pViewManager->sendMessage(pViewManager->getLcd(), 0, 0, "MM_ACT_", value);
-                                pDevices->activateById(atoi(value), ACTIVATE_COMMAND, DEACTIVATE_COMMAND);
-                            } else {
-                                pViewManager->sendMessage(pViewManager->getLcd(), 0, 0, "MM_DACT_", value);
-                                pDevices->deactivateById(atoi(value), DEACTIVATE_COMMAND);
-                            }
-                        } else {
-                          pViewManager->sendMessage(pViewManager->getLcd(), 0, 0, "ERROR_DISP_", value);
-                        }
-			break;
-		default:
-			// Ejecuta otras acciones cuando no se ha definido una Action definida
-			break;
+*/
+void ProcessManager::doAction(byte actionCode, String stringValue){
+	char charValue[stringValue.length()+1];
+	stringValue.toCharArray(charValue, stringValue.length()+1);
+    	Device* pDevice = NULL;
+	if (actionCode == ACTION_ACTIVATE) {
+		// Ejecuta acciones para la Action ACTIVATE
+		if (pDevices->activateById(atoi(charValue), ACTIVATE_COMMAND, DEACTIVATE_COMMAND) == true ) {
+		  pUserFacade->sendMessage(0, 0, "MM_ACT_", charValue);
+		} else {
+		  pUserFacade->sendMessage(0, 0, "ERROR_DISP_", charValue);
+		}
+	} else if (actionCode == ACTION_DEACTIVATE) {
+		// Ejecuta acciones para la Action DEACTIVATE
+		if (pDevices->deactivateById(atoi(charValue), DEACTIVATE_COMMAND) == true ) {
+		  pUserFacade->sendMessage(0, 0, "MM_DACT_", charValue);
+		} else {
+		  pUserFacade->sendMessage(0, 0, "ERROR_DISP_", charValue);
+		}
+	} else if (actionCode == ACTION_ON_OFF) {
+		// Ejecuta acciones para la Action ON_OFF
+		pDevice = pDevices->getDevice(atoi(charValue));
+		if (pDevice != NULL ) {
+		    if (pDevice->getState() == INACTIVE_DEVICE ) {
+		        pUserFacade->sendMessage(0, 0, "MM_ACT_", charValue);
+		        pDevices->activateById(atoi(charValue), ACTIVATE_COMMAND, DEACTIVATE_COMMAND);
+		    } else {
+		        pUserFacade->sendMessage(0, 0, "MM_DACT_", charValue);
+		        pDevices->deactivateById(atoi(charValue), DEACTIVATE_COMMAND);
+		    }
+		} else {
+		  pUserFacade->sendMessage(0, 0, "ERROR_DISP_", charValue);
+		}
 	}
-
 }
-

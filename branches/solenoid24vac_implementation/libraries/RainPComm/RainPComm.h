@@ -12,6 +12,7 @@ public:
 	void setTargetNet(unsigned long targetNet);
 	void setSourceDev(unsigned int sourceDev);
 	String getMessage(unsigned int deviceId);
+	bool startTxComm();
  
 private:
 

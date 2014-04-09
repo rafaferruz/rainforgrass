@@ -4,29 +4,38 @@
 #include "Arduino.h"
 #include "RainPComm.h"
 
+// Constantes de configuracin de dispositivos
+extern const int NOT_ASSIGNED_DEVICE_CODE;  // Cdigo de dispositivo para dispositivos sin asignar
+extern const int NOT_ASSIGNED_NET_CODE;  // Cdigo de red sin asignar
+extern const int ACTIVE_DEVICE;  // Dispositivo activo
+extern const int INACTIVE_DEVICE; // Dispositivo inactivo
+// Constantes de tipos de dispositivos
+extern const int ELECTRO_VALVE;  // Electroválvula
+extern const int HUMIDITY_SENSOR;  // Sensor de humedad
+extern const int TEMPERATURE_SENSOR;  // Sensor de temperatura
+
 class Device {
 public:
 	Device();
-	Device(int id, int net, RainPComm * pProtocol) ;
+	Device(unsigned int id, unsigned int net, RainPComm * pProtocol) ;
+	virtual ~Device();
  
-	void initialize(int id, int  net);
-	void initialize(int id, int  net, RainPComm * pProtocol);
-	const int getDeviceId() ;
-	const int getNetCode() ;
+	void initialize( unsigned int id, unsigned int  net);
+	void initialize( unsigned int id, unsigned int  net, RainPComm * pProtocol);
+	const unsigned short getDeviceType() ;
+	const unsigned int getDeviceId() ;
+	const unsigned int getNetCode() ;
 	const byte getState() ;
-	bool deactivate(char * command);
-	bool activate(char * command);
+	virtual bool deactivate(char * command) ;
+	virtual bool activate(char * command) ;
 
-private:
-	int deviceId;
-	int netCode;
+protected:
+	unsigned short deviceType;
+	unsigned int deviceId;
+	unsigned int netCode;
 	RainPComm * pProtocol;
-	byte state;	// 0 = No activated; 1 = Activated;
-	// Constantes de configuracin de dispositivos
-	const int NOT_ASSIGNED_DEVICE_CODE = -1;  // Cdigo de dispositivo para dispositivos sin asignar
-	const int NOT_ASSIGNED_NET_CODE = -1;  // Cdigo de red sin asignar
-	const int ACTIVE_DEVICE = 1;  // Dispositivo activo
-	const int INACTIVE_DEVICE = 0; // Dispositivo inactivo
+	byte state;	// INACTIVE_DEVICE = No activated; ACTIVE_DEVICE = Activated;
+
 
 };
  
