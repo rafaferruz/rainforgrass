@@ -9,10 +9,36 @@ Parámetros:
 */
  
 Device::Device() :
+	deviceType( 0 ),
 	deviceId( NOT_ASSIGNED_DEVICE_CODE ),
 	netCode( NOT_ASSIGNED_NET_CODE ),
 	state(INACTIVE_DEVICE)
-{ }
+{
+ }
+
+/* 
+Crea un objeto Device con el valor de sus datos iniciales
+
+Parámetros:
+	deviceType	Tipo de Dispositivo	11= Electroválvula; 21=Sensor humedad; 22=Sensor temperatura
+	id		Código de identificación del Dispositivo
+	net		Código de Red del Dispositivo
+	pProtocol	Puntero a un objeto RainPComm que representa el protocolo de comunicaciones
+*/
+ 
+Device::Device(unsigned int id, unsigned int net, RainPComm * pProtocol) :
+	deviceType( 0 ),
+	deviceId( id ),
+	netCode( net ),
+	pProtocol( pProtocol)
+{
+ }
+
+/* 
+Destruye un objeto Device
+*/
+ 
+Device::~Device() { }
 
 /*
 Inicializa un dispositivo en el controller con el identificador de dispositivo y la red a la que pertenece.
@@ -21,7 +47,7 @@ Parámetros:
 	id	Entero para asignar un identificador de dispositivo de destino
 	net	Entero para indicar a qué red pertenece el dispositivo
 */
-void Device::initialize(int id, int  net) {
+void Device::initialize(unsigned int id, unsigned int net) {
 	this->deviceId = id ;
 	this->netCode = net ;
 }
@@ -35,10 +61,19 @@ Parámetros:
 	RainPComm *	Puntero referencia al objeto de protocolo de comunicaciones de tipo RainPComm
 	
 */
-void Device::initialize(int id, int  net, RainPComm * pProtocol) {
+void Device::initialize(unsigned int id, unsigned int net, RainPComm * pProtocol) {
 	this->deviceId = id ;
 	this->netCode = net ;
 	this->pProtocol = pProtocol ;
+}
+
+/*
+Devuelve un entero con el Tipo del dispositivo
+
+Parámetros:	Ninguno.
+*/
+const unsigned short Device::getDeviceType(){
+	return this->deviceType;
 }
 
 /*
@@ -46,7 +81,7 @@ Devuelve un entero con el número de identificación del dispositivo asignado al
 
 Parámetros:	Ninguno.
 */
-const int Device::getDeviceId(){
+const unsigned int Device::getDeviceId(){
 	return this->deviceId;
 }
 
@@ -55,7 +90,7 @@ Devuelve un entero con el número de red del dispositivo asignado al objeto Devi
 
 Parámetros:	Ninguno.
 */
-const int Device::getNetCode(){
+const unsigned int Device::getNetCode(){
 	return this->netCode;
 }
 
@@ -74,35 +109,25 @@ const byte Device::getState(){
 /*
 Manda una orden de desactivación al objeto Device. Devuelve un valor booleano para indicar el éxito o fracaso de la orden. En la actual versión, siempre devuelve true.
 
-Parámetros:	Ninguno.
+Parámetros:	command	Comando que debe ser enviado al dispositivo para su desactivación
 
 Devuelve:	true	La orden se ha enviado correctamente.
 		false	La orden no ha podido ser enviada.
 */
 bool Device::deactivate(char * command){
-	// Operaciones de desactivación del dispositivo
-	if ((*pProtocol).sendMessage(this->deviceId, command)) {
-		this->state = INACTIVE_DEVICE;
-		return true;
-	}
-	return false;
+	return true;
 }
 
 /*
 Manda una orden de activación al objeto Device. Devuelve un valor booleano para indicar el éxito o fracaso de la orden. En la actual versión, siempre devuelve true.
 
-Parámetros:	Ninguno.
+Parámetros:	command	Comando que debe ser enviado al dispositivo para su activación
 
 Devuelve:	true	La orden se ha enviado correctamente.
 		false	La orden no ha podido ser enviada.
 */
 bool Device::activate(char * command){
-	// Operaciones de activación del dispositivo
-	if ((*pProtocol).sendMessage(this->deviceId, command)) {
-		this->state = ACTIVE_DEVICE;
-		return true;
-	}
-	return false;
-
+	return true;
 }
+
 

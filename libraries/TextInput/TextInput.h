@@ -3,9 +3,9 @@
 
 #include "Arduino.h"
 	// Tipos de chequeo con datos entrados desde el keypad
-	const byte NOTHING_TO_DO = 0;
-	const byte CHECK_DATE = 1;
-	const byte CHECK_TIME = 2;
+extern	const byte NOTHING_TO_DO;
+extern	const byte CHECK_DATE;
+extern	const byte CHECK_TIME;
 
 class TextInput {
 public:
@@ -16,6 +16,7 @@ public:
 	void setTextBuffer(String initialTextBuffer);
 	const String getTextBuffer();
 	bool addChar(char key);
+	bool removeLastChar();
 	const bool matchTextBuffer();
  
 private:

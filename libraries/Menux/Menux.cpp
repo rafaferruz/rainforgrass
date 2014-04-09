@@ -3,13 +3,12 @@
 #include "Menux.h"
  
 Menux::Menux() :
-	lastOption(0),
+	lastOption(-1),
 	presentOption(0)
 { }
 
 void Menux::addMenuOption(MenuOption menuOption) {
-	menuOptionList[lastOption] = menuOption;
-	lastOption += 1;
+	menuOptionList[++lastOption] = menuOption;
 }	
 
 byte Menux::getLastOption() {
@@ -28,8 +27,8 @@ byte Menux::getPresentMenuCode(){
 	return presentMenuCode;
 }
 
-MenuOption Menux::getPresentMenuOption(){
-	return menuOptionList[presentOption];
+MenuOption * Menux::getPresentMenuOption(){
+	return menuOptionList + presentOption;
 }
 
 void Menux::setTitleMenuOption(String title){
@@ -40,73 +39,83 @@ String Menux::getTitleMenuOption(){
 	return titleMenuOption;
 }
 
-byte Menux::goBackMenu(byte indexOption){
-	if (menuOptionList[indexOption].getMenuBackCode() == 0) {
-		presentOption = searchNextOption( indexOption, 1);
+MenuOption * Menux::goBackOption(){
+	if (menuOptionList[presentOption].getMenuBackCode() == 0) {
+		presentMenuCode = 1;
 	} else {
-		presentOption = searchNextOption( indexOption, menuOptionList[indexOption].getMenuBackCode());
+		presentMenuCode = menuOptionList[presentOption].getMenuBackCode();
 	}
-	return presentOption;	
+	goNextOption();
+	return menuOptionList + presentOption;	
 }
 
-byte Menux::goNextOption(byte indexOption) {
-	// Se busca la siguiente MenuOption del grupo
-	presentOption = searchNextOption(indexOption, menuOptionList[indexOption].getMenuCode());
-	return presentOption;
+MenuOption * Menux::goFollowOption() {
+	if (menuOptionList[presentOption].getMenuNextCode() != 0) {
+		presentMenuCode = menuOptionList[presentOption].getMenuNextCode();
+	}
+	goNextOption();
+	return menuOptionList + presentOption;	
 }
 
 // Devuelve el valor de la option
-char* Menux::getSelectOptionValue(byte indexOption) {
-	if (menuOptionList[indexOption].getMenuNextCode() == 0) {
-		char* returnedValue = menuOptionList[indexOption].getDefaultValue();
-		goBackMenu(indexOption);
+char* Menux::getSelectOptionValue() {
+	if (menuOptionList[presentOption].getMenuNextCode() == 0) {
+		char* returnedValue = menuOptionList[presentOption].getDefaultValue();
+		goBackOption();
 		return returnedValue;
 	} else {
-		presentOption = searchNextOption( indexOption, menuOptionList[indexOption].getMenuNextCode());
-		return "";
+		presentMenuCode = menuOptionList[presentOption].getMenuCode();
+		goNextOption();
+		return '\0';
 	}
 }
 
-byte Menux::searchNextOption(byte fromOption, byte menuCodeToSearch) {
-	byte i;
-	for ( i = fromOption + 1; i < lastOption; i++) {
-		if (menuOptionList[i].getMenuCode() == menuCodeToSearch) {
+MenuOption * Menux::goNextOption() {
+	short i;
+	for ( i = presentOption + 1; i <= lastOption; i++) {
+		if (menuOptionList[i].getMenuCode() == presentMenuCode) {
 			presentOption = i;
 			presentMenuCode = menuOptionList[i].getMenuCode();
-			setTitleMenuOption(*searchTitleMenuOption(i) + ": " + *menuOptionList[fromOption].getDefaultValue());
-			return i;
+			setTitleMenuOption(*searchTitleMenuOption(i) + ": " + *menuOptionList[presentOption].getDefaultValue());
+			return menuOptionList + i;
 		}
 	}
-	for ( i = 0; i < fromOption; i++) {
-		if (menuOptionList[i].getMenuCode() == menuCodeToSearch) {
+	// El siguiente caso es para retornar al nivel de menú superior después de la última opción de dato entrante
+	if (menuOptionList[presentOption].getTextInput() != NULL) {
+		presentMenuCode = menuOptionList[presentOption].getMenuBackCode();
+		goPreviousOption();
+		return menuOptionList + presentOption;
+	}
+	for ( i = 0; i < presentOption; i++) {
+		if (menuOptionList[i].getMenuCode() == presentMenuCode) {
 			presentOption = i;
 			presentMenuCode = menuOptionList[i].getMenuCode();
-			setTitleMenuOption(*searchTitleMenuOption(i) + ": " + *menuOptionList[fromOption].getDefaultValue());
-			return i;
+			setTitleMenuOption(*searchTitleMenuOption(i) + ": " + *menuOptionList[presentOption].getDefaultValue());
+			return menuOptionList + i;
 		}
 	}
-	return fromOption;
+	return menuOptionList + presentOption;
 }
 
-void Menux::showMenuOption(LiquidCrystal * lcd) {
-	// Se envía al display el título del grupo de MenuOptions	
-	lcd->clear();
-	if (presentMenuCode == 1) {
-		titleMenuOption = "Menu General";
+MenuOption * Menux::goPreviousOption() {
+	short i;
+	for ( i = presentOption - 1; i >= 0 ; i--) {
+		if (menuOptionList[i].getMenuCode() == presentMenuCode) {
+			presentOption = i;
+			presentMenuCode = menuOptionList[i].getMenuCode();
+			setTitleMenuOption(*searchTitleMenuOption(i) + ": " + *menuOptionList[presentOption].getDefaultValue());
+			return menuOptionList + i;
+		}
 	}
-//	lcd->setCursor(0, 0);
-//	lcd->print(titleMenuOption);
-	// Se envía al display la MenuOption actual
-	lcd->setCursor(0, 1);
-	lcd->print(menuOptionList[presentOption].getOptionText());
-	return;
-}
-
-void Menux::showMenuOption(LiquidCrystal * lcd, String value) {
-	showMenuOption(lcd);
-	// Se envía al display el valor adicional a mostrar
-	lcd->print(" " + value);
-	return;
+	for ( i = lastOption; i > presentOption; i--) {
+		if (menuOptionList[i].getMenuCode() == presentMenuCode) {
+			presentOption = i;
+			presentMenuCode = menuOptionList[i].getMenuCode();
+			setTitleMenuOption(*searchTitleMenuOption(i) + ": " + *menuOptionList[presentOption].getDefaultValue());
+			return menuOptionList + i;
+		}
+	}
+	return menuOptionList + presentOption;
 }
 
 char* Menux::searchTitleMenuOption(byte indexOption){
@@ -116,5 +125,5 @@ char* Menux::searchTitleMenuOption(byte indexOption){
 			return menuOptionList[i].getOptionText();
 		}
 	}
-	return "";
+	return '\0';
 }

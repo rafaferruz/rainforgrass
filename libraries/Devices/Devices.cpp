@@ -1,5 +1,7 @@
 #include "Arduino.h"
 #include "Devices.h"
+#include "DeviceElectroValve.h"
+
 #include "RainPComm.h"
 
 /* 
@@ -10,25 +12,22 @@ Parámetros:
 	numDevices	Recibe el número de dispositivos que podrá gestionar la factoría
 */
 
-Devices::Devices(Device * pDevices, int numDevices) {
-	this->pDevices = pDevices;
-	this->numDevices = numDevices;
-}
+Devices::Devices() :
+	firstFreeIndex(0), 
+	numDevices( MAX_NUM_DEVICES)
+	{
+		this->pDevices = new Device * [MAX_NUM_DEVICES ];
+ }
 
 /*
 	Devuelve true si consigue añadir el dispositivo a la lista y false si la lista está llena y no lo puede añadir.
 */ 
-bool Devices::addDevice(int id, int net, RainPComm * pRainPComm){
+bool Devices::addDevice(Device * device){
 	// Comprobamos que no exista ya el 'id' en la lista
-	if ( this->getDeviceIndex( id ) > NOT_ASSIGNED_DEVICE_CODE ) {
-		return false;
-	}
-	int i = 0;
-	for (i = 0; i < numDevices; i++) {
-		if ( pDevices[i].getDeviceId() == NOT_ASSIGNED_DEVICE_CODE) {
-			pDevices[i].initialize( id, net, pRainPComm);
-			return true;
-		}
+	if ( this->getDeviceIndex( device->getDeviceId() ) < 0  && firstFreeIndex < numDevices) {
+		pDevices[firstFreeIndex] = device;
+		firstFreeIndex++;
+		return true;
 	}
 	return false;
 }
@@ -37,10 +36,17 @@ bool Devices::addDevice(int id, int net, RainPComm * pRainPComm){
 	Devuelve true si consigue eliminar el dispositivo de la lista y false si no lo puede eliminar porque no lo encuentra en la lista.
 */ 
 bool Devices::removeDevice(Device device){
-	int i = 0;
-	for (i = 0; i < numDevices; i++) {
-		if ( pDevices[i].getDeviceId() == device.getDeviceId() ) {
-			pDevices[i].initialize( NOT_ASSIGNED_DEVICE_CODE, NOT_ASSIGNED_NET_CODE); 
+	int i = 0, j = 0;
+	for (i = 0; i < firstFreeIndex; i++) {
+		if ( pDevices[i]->getDeviceId() == device.getDeviceId() ) {
+			delete pDevices[i]; 		// Devuelve la memoria ocupada
+			pDevices[i] = NULL;
+			// Mueve los punteros hacia arriba de la lista para ocupar el puesto dejado vacio
+			for ( j = i; j < firstFreeIndex - 1; j++) {
+				pDevices[j] = pDevices[j + 1];
+				pDevices[j + 1] = NULL;
+			}
+			firstFreeIndex--;
 			return true;
 		}
 	}
@@ -51,7 +57,10 @@ bool Devices::removeDevice(Device device){
 	Devuelve el dispositivo que se encuentra en la posición indicada por el índice que se pasa como parámetro.
 */ 
 Device* Devices::getDevice(byte index){
-	return pDevices + index;
+	if (index > firstFreeIndex) {
+		return NULL;
+	}
+	return *(pDevices + index);
 }
 
 /*
@@ -59,12 +68,25 @@ Device* Devices::getDevice(byte index){
 */ 
 int Devices::getDeviceIndex(int id){
 	int i = 0;
-	for (i = 0; i < numDevices; i++) {
-		if (pDevices[i].getDeviceId() == id) {
+	for (i = 0; i < firstFreeIndex; i++) {
+		if (pDevices[i]->getDeviceId() == id) {
 			return i;
 		}
 	}
 	return -1;
+}
+
+/*
+	Devuelve un apuntador al objeto Device cuyo id es igual al pasado como parámetro.
+*/ 
+Device* Devices::getDevice(int id){
+	int i = 0;
+	for (i = 0; i < firstFreeIndex; i++) {
+		if (pDevices[i]->getDeviceId() == id) {
+			return pDevices[i];
+		}
+	}
+	return NULL;
 }
 
 /*
@@ -73,8 +95,8 @@ int Devices::getDeviceIndex(int id){
 bool Devices::deactivateAll(char * deactivateCommand){
 	int i = 0;
 	for (i = 0; i < numDevices; i++) {
-		if (pDevices[i].getDeviceId() >= NOT_ASSIGNED_DEVICE_CODE && pDevices[i].getState() == INACTIVE_DEVICE ) {
-			pDevices[i].deactivate(deactivateCommand);
+		if (pDevices[i]->getDeviceId() != NOT_ASSIGNED_DEVICE_CODE && pDevices[i]->getState() != INACTIVE_DEVICE ) {
+			pDevices[i]->deactivate(deactivateCommand);
 		}
 	}
 	return true;
@@ -85,9 +107,9 @@ bool Devices::deactivateAll(char * deactivateCommand){
 */ 
 bool Devices::deactivateById(int id, char * deactivateCommand){
 	int i = 0;
-	for (i = 0; i < numDevices; i++) {
-		if (pDevices[i].getDeviceId() == id && pDevices[i].getState() == ACTIVE_DEVICE ) {
-			pDevices[i].deactivate(deactivateCommand);
+	for (i = 0; i < firstFreeIndex; i++) {
+		if (pDevices[i]->getDeviceId() == id && pDevices[i]->getState() == ACTIVE_DEVICE ) {
+			pDevices[i]->deactivate(deactivateCommand);
 			return true;
 		}
 	}
@@ -103,9 +125,9 @@ bool Devices::activateById(int id, char * activateCommand, char * deactivateComm
 
 	// Activación del dispositivo indicado
 	int i = 0;
-	for (i = 0; i < numDevices; i++) {
-		if (pDevices[i].getDeviceId() == id) {
-			pDevices[i].activate(activateCommand);
+	for (i = 0; i < firstFreeIndex; i++) {
+		if (pDevices[i]->getDeviceId() == id) {
+			pDevices[i]->activate(activateCommand);
 			return true;
 		}
 	}

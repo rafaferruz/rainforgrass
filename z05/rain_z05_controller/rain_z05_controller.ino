@@ -15,9 +15,6 @@ en la memoria flash */
 // La librera TextInput permite crear objetos que chequean y gestionan los datos entrados a traves del keypad
 #include <TextInput.h>
 
-// Se utiliza un fichero de configuración externo para aportar los estados iniciales.
-#include "constants.h"
-
 // La librera KeyManager permite crear un objeto KeyManager que ser el responsable de gestionar el mod de funcionamiento
 // del teclado de entrada de datos y ordenes del sistema
 #include <KeyManager.h>
@@ -26,6 +23,11 @@ en la memoria flash */
 // de menus, datos entrados y mensajes por medio de un display LCD
 #include <ViewManager.h>
 
+// La librera UserFacade permite crear un objeto UserFacade que sera el responsable de gestionar la entrada de datos
+// desde el teclado de usuario y la salida de datos al display de visualizacion, en el orden de navegacin y con las
+// condiciones indicadas en el objeto Menux
+#include <UserFacade.h>
+
 // La librera ProcessManager permite crear un objeto ProcessManager que sera el Controller en el patron MVC
 #include <ProcessManager.h>
 
@@ -33,7 +35,7 @@ en la memoria flash */
 #include <Bounce.h>
 
 // Se utiliza la librería LiquidCrystal.h para controlar el display LCD
-#include "LiquidCrystal.h"
+#include <LiquidCrystal.h>
 
 // Se incluyen las librerías MenuOption y Menux que permiten la creación de menús utilizando un display LCD de 16x2
 #include <MenuOption.h>
@@ -42,6 +44,7 @@ en la memoria flash */
 // La clase Devices se usa para construir una coleccion de objetos Device 
 #include <Devices.h>
 #include <Device.h>
+#include <DeviceElectroValve.h>
 
 
 
@@ -51,6 +54,9 @@ controlar */
 /* La librera RainPComm implementa un protocolo propio para la transmisiones de la aplicacion */
 #include <RainPComm.h>
 
+// Se utiliza un fichero de configuración externo para aportar los estados iniciales.
+#include "constants.h"
+
 
 
 // Inicializamos las variables del programa
@@ -58,8 +64,7 @@ controlar */
 boolean lcdDisplayStatus = true;
 long lcdTimeStatus = 0;
   // Otras variables
-Device arrayDevices[MAX_NUM_DEVICES];
-Devices * pDevices = new Devices( arrayDevices, MAX_NUM_DEVICES );
+Devices * pDevices = new Devices();
 RainPComm * pRainPComm = new RainPComm( TX_PIN, RC_PIN, SPEED_COMM, TARGET_NET, SOURCE_DEV);
 RainPComm & rRainPComm = *pRainPComm;
 
@@ -67,7 +72,7 @@ LiquidCrystal * pLcd = new LiquidCrystal(LCD_REGISTER_SELECT, LCD_ENABLE, LCD_DB
 LiquidCrystal & rLcd = *pLcd;
 
 // Creamos un objeto para controlar el menú de opciones
-Menux menux = Menux();
+Menux * pMenux = new Menux();
 
 // Creamos un objeto para controlar entrada de ordenes desde un keypad
 char keys[KEYPAD_ROWS][KEYPAD_COLUMNS];
@@ -82,12 +87,20 @@ KeyManager & rKeyManager = *pKeyManager;
 ViewManager * pViewManager = new ViewManager(pLcd);
 ViewManager & rViewManager = *pViewManager;
 
+// Creamos un objeto responsable de definir los datos a recibir por teclado y su formato, recibir dichos datos del 
+// teclado y mostrar informacin al usuario en el display
+UserFacade * pUserFacade = new UserFacade(pKeyManager, pViewManager, pMenux);
+UserFacade & rUserFacade = *pUserFacade;
+
 // Creamos un objeto responsable de recibir datos de los dispositivos de entrada, procesar los datos y enviar
 // datos o acciones a realizar a los dispositivos de salida
-ProcessManager * pProcessManager = new ProcessManager(pKeyManager, pViewManager);
+ProcessManager * pProcessManager = new ProcessManager(pUserFacade);
 ProcessManager & rProcessManager = *pProcessManager;
 
 // Fin de inicializacion de variables
+
+unsigned long counter = 0;
+unsigned long time = 0;
 
 void setup() {
   Serial.begin(SERIAL_SPEED);
@@ -95,17 +108,22 @@ void setup() {
   rLcd.begin(LCD_COLUMNS, LCD_ROWS);
 
   // Rellenamos las opciones del menú de la aplicación
-  menux.addMenuOption( MenuOption( 1, "MODO MANUAL", 0, 2, "", NO_ACTION));
-  menux.addMenuOption( MenuOption( 2, "Dispositivo:", 1, 0, "0", ACTION_ON_OFF, new TextInput(2, "*#", NOTHING_TO_DO)));
-  menux.addMenuOption( MenuOption( 1, "MODO PROGRAMA", 0, 3, "", NO_ACTION));
-  menux.addMenuOption( MenuOption( 3, "No disponible 3", 1, 1, "", NO_ACTION));
-  menux.addMenuOption( MenuOption( 1, "MODO CONFIG.", 0, 4, "", NO_ACTION));
-  menux.addMenuOption( MenuOption( 4, "Fecha:", 1, 4, "", SET_DATE, new TextInput(8, "########", CHECK_DATE)));
-  menux.addMenuOption( MenuOption( 4, "Hora:", 1, 0, "", SET_TIME, new TextInput(6, "######", CHECK_TIME)));
-  // Pasamos la definicin del servicio de navegacion al objeto ViewManager
-  rViewManager.setMenux(&menux);
-  // Se arranca el servicio de navegacion
-  rViewManager.startMenux();
+  /* Campos de MenuOption:
+  *  menuCode
+  *  optionText
+  *  menuBackCode
+  *  menuNextCode
+  *  defaultValue
+  *  actionCode
+  *  textInput
+  */
+  pMenux->addMenuOption( MenuOption( 1, "MODO MANUAL", 0, 2, "", NO_ACTION));
+  pMenux->addMenuOption( MenuOption( 2, "Dispositivo:", 1, 0, "0", ACTION_ON_OFF, new TextInput(2, "*#", NOTHING_TO_DO)));
+  pMenux->addMenuOption( MenuOption( 1, "MODO PROGRAMA", 0, 3, "", NO_ACTION));
+  pMenux->addMenuOption( MenuOption( 3, "No disponible 3", 1, 1, "", NO_ACTION));
+  pMenux->addMenuOption( MenuOption( 1, "MODO CONFIG.", 0, 4, "", NO_ACTION));
+  pMenux->addMenuOption( MenuOption( 4, "Fecha:", 1, 4, "", SET_DATE, new TextInput(8, "########", CHECK_DATE)));
+  pMenux->addMenuOption( MenuOption( 4, "Hora:", 1, 0, "", SET_TIME, new TextInput(6, "######", CHECK_TIME)));
 
   // Inicializacin del keypad
   int i, j;
@@ -118,61 +136,28 @@ void setup() {
   rKeyManager.getKeypad()->begin( makeKeymap( keys)); 
  
   // Inicializamos los dispositivos
-  pDevices->addDevice( 1, TARGET_NET, pRainPComm); 
-  pDevices->addDevice( 2, TARGET_NET, pRainPComm); 
-  pDevices->addDevice( 3, TARGET_NET, pRainPComm); 
-  pDevices->addDevice( 4, TARGET_NET, pRainPComm); 
+  pDevices->addDevice(new DeviceElectroValve(1, TARGET_NET, pRainPComm)); 
+  pDevices->addDevice(new DeviceElectroValve(2, TARGET_NET, pRainPComm)); 
+  pDevices->addDevice(new DeviceElectroValve(3, TARGET_NET, pRainPComm)); 
+  pDevices->addDevice(new DeviceElectroValve(4, TARGET_NET, pRainPComm)); 
   // Pasa la lista de dispositivos a ProcessManager
   rProcessManager.setDevices(pDevices);
   
-  Serial.println("IN SETUP");
+  //Se ejecuta el setup del protocolo de comunicaciones RainPComm
+  if (!pRainPComm->startTxComm()) {
+    Serial.println("Fail TX Comm starting");
+  }
+  
+  Serial.println("IN SETUP 1");
 
-  // Activamos el display
-  setOnLCD(rLcd);
+  // Se arranca el servicio de navegacion
+  pProcessManager->startServices();
 }
 
 void loop() {
-
-  // Si se sobrepasa el tiempo de displayado de datos sin atender el menu, se hace un apagado del display.
-  setOffLCD(rLcd);
-	// Hacemos un delay de DELAY_CHECK_KEYS milisegundos entre consultas de pulsaciones
-	delay(DELAY_CHECK_KEYS);
-  // Consultamos estado del teclado si se ha pulsado alguna tecla
-  char keySignal = rKeyManager.getSignal();
-  
-  // Si se ha pulsado una tecla y el display est apagado se procede al encendido del display.
-  if (keySignal != 0 && lcdDisplayStatus == false) {
-      setOnLCD(rLcd);
-  }
-  if (keySignal != 0) {
-    lcdTimeStatus = millis();
-    Serial.println(keySignal);
-	// Consultamos si KeyManager desea pasar informacin a ProcessManager
-        rProcessManager.processKeySignal(keySignal);
-                
-  }
+        rProcessManager.processLifeCycle();
 }
 
 
-void deactivateDevice(char* device) {
-  // deactivate action del dispositivo
-}
-
-void deactivateAllDevices() {
-}
-
-
-void setOffLCD( LiquidCrystal & lcd) {
-  if ( ( (millis() - lcdTimeStatus) > (TIME_DISPLAY_OFF * 1000) ) && lcdDisplayStatus == true) {
-    lcdDisplayStatus = false;
-    lcd.noDisplay();
-  }
-}
-
-void setOnLCD( LiquidCrystal & lcd) {
-  lcdDisplayStatus = true;
-  lcd.display();
-  lcdTimeStatus = millis();
-}
 
 
