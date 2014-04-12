@@ -27,6 +27,7 @@ private:
 	byte stateRxComm;	// Receiver: 0 = Comm desactivada; 1 = Comm activada
 	unsigned long addressBlockNumber;
 	String command;
+	String message;
 
 	bool isRightTxComm();
 	bool isRightRxComm();

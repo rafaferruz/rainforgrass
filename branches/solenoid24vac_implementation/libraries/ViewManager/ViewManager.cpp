@@ -34,7 +34,7 @@ void ViewManager::showMenuOption(MenuOption * menuOption) {
 
 void ViewManager::showTextInput(MenuOption * menuOption) {
 	pMenuOption = menuOption;
-	clearLine(1);
+	clearLine(0, 1);
 	pLcd->print(pMenuOption->getTextInput()->getTextBuffer());
 }
 
@@ -43,7 +43,7 @@ void ViewManager::showTextInput(MenuOption * menuOption) {
   y concatenando las cadenas messageCode y value.
 */
 void ViewManager::sendMessage(short unsigned column, short unsigned row, String messageCode, char* value) {
-	this->clearLine(row);
+	this->clearLine(column, row);
 	pLcd->setCursor( column, row);
 	messageCode.concat(value);
 	pLcd->print(messageCode);
@@ -64,13 +64,13 @@ bool ViewManager::isTurnedOn() {
 	return lightStatus;
 }
 
-void ViewManager::clearLine(unsigned short line) {
+void ViewManager::clearLine(short unsigned column, unsigned short row) {
 	byte i;
-	pLcd->setCursor(0, line);
-	for (i = 0; i < LCD_COLUMNS; i++) {
+	pLcd->setCursor(column, row);
+	for (i = column; i < LCD_COLUMNS; i++) {
 		pLcd->write(' ');
 	}
-	pLcd->setCursor(0, line);
+	pLcd->setCursor(column, row);
 }
 
 

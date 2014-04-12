@@ -1,10 +1,6 @@
 #include "ProcessManager.h"
 
 
-char ProcessManager::ACTIVATE_COMMAND[4] = "001";
-char ProcessManager::DEACTIVATE_COMMAND[4] = "002";
-
-
 /* Se crea un objeto ProcessManager pasando como parámetros los objetos UserFacade
 *
 * Parámetros:
