@@ -23,6 +23,9 @@ extern const int NOT_ASSIGNED_DEVICE_CODE;  // Cdigo de dispositivo para disposi
 extern const int NOT_ASSIGNED_NET_CODE;  // Cdigo de red sin asignar
 extern const int ACTIVE_DEVICE;  // Dispositivo activo
 extern const int INACTIVE_DEVICE; // Dispositivo inactivo
+// Constantes de Comandos de Acciones sobre dispositivos
+extern char ACTIVATE_COMMAND[4];
+extern char DEACTIVATE_COMMAND[4];
 
 
 class ProcessManager {
@@ -43,10 +46,6 @@ public:
 private:
 	UserFacade * pUserFacade;
 	Devices * pDevices;
-
-static char ACTIVATE_COMMAND[4];
-static char DEACTIVATE_COMMAND[4];
-
 
 };
 

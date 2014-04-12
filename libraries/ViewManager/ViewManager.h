@@ -30,7 +30,7 @@ private:
 	MenuOption * pMenuOption;
 	bool lightStatus;
 
-	void clearLine(unsigned short line);
+	void clearLine(unsigned short column, unsigned short row);
 
 };
  

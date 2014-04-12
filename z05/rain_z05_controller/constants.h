@@ -70,7 +70,9 @@ const int INACTIVE_DEVICE = 0; // Dispositivo inactivo
 const int ELECTRO_VALVE = 11;  // Electroválvula
 const int HUMIDITY_SENSOR = 21;  // Sensor de humedad
 const int TEMPERATURE_SENSOR = 22;  // Sensor de temperatura
-
+// Constantes de Comandos de Acciones sobre dispositivos
+char ACTIVATE_COMMAND[4] = "001";
+char DEACTIVATE_COMMAND[4] = "002";
 
 // Control del menú de la aplicación
 const byte MENU_START_CODE = 1;
