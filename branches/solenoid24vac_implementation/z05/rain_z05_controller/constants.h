@@ -81,7 +81,7 @@ const String MENU_MAIN_TITLE = "RAIN_Z05";
 
 // Control de comunicaciones por VirtualWire
 const byte TX_PIN = 13;
-const byte RC_PIN = 12;
+const byte RX_PIN = 12;
 const unsigned long SPEED_COMM = 2000;
 const unsigned long TARGET_NET = 11111;
 const unsigned int SOURCE_DEV = 111;
