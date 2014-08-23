@@ -16,9 +16,16 @@ const byte TX_PIN = 3;                   // No usado en dispositivos SOLO RECEPC
 const byte RX_PIN = 2;
 const unsigned long SPEED_COMM = 2000;    // bps
 const unsigned long TARGET_NET = 11111;
-const unsigned int DEVICE_ID = 3;
-const unsigned int CONTROL_DEV = 111;
+const unsigned int SOURCE_DEV = 111;
 
 const unsigned int MILLIS_BETWEEN_MESSAGES = 50;  // Miliseconds entre consulta de mensajes recibidos
 
-const int PIN_ACTIVATION = 9;
+const unsigned short GENERAL_RELAY_CONTROL_PIN = 9;
+const unsigned short ADRESSES_ENABLING_PIN = 5;
+
+const unsigned short ADDRES_RELAY_PIN_A = 6;  //PIN_A para direccion de rele
+const unsigned short ADDRES_RELAY_PIN_B = 7;  //PIN_B para direccion de rele
+const unsigned short ADDRES_RELAY_PIN_C = 8;  //PIN_C para direccion de rele
+
+const unsigned short ADDRES_BOARD_PIN_A = 3;  //PIN_A para direccion de placa
+const unsigned short ADDRES_BOARD_PIN_B = 4;  //PIN_B para direccion de placa

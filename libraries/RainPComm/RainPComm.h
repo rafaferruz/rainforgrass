@@ -11,7 +11,9 @@ public:
 	bool sendMessage(int targetDev, char* command);
 	void setTargetNet(unsigned long targetNet);
 	void setSourceDev(unsigned int sourceDev);
-	String getMessage(unsigned int deviceId);
+	String getMessage(unsigned int sourceDev);
+	String getCommand();
+	unsigned int getTargetDev();
 	bool startTxComm();
  
 private:

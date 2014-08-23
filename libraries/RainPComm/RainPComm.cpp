@@ -32,6 +32,7 @@ bool RainPComm::sendMessage(int targetDevice, char* command){
 	}
 for (int i=0; i<3; i++){
 	message = prepareAddressBlock(targetDevice);
+Serial.println(message);
 	message.toCharArray(partOfMsg, message.length()+1);
 	// Llamada a la librería VirtualWire para transmisión del paquete de direcciones
 	if ( vw_send( (uint8_t*)partOfMsg, (uint8_t)message.length()) == false) {
@@ -50,35 +51,38 @@ for (int i=0; i<3; i++){
 }
 
 // Lee un mensaje desde el receptor con verificación de direcciones y estructuras de los bloques
-String RainPComm::getMessage(unsigned int deviceId){
+String RainPComm::getMessage(unsigned int sourceDev){
 
 	message = "";
 	bool okMsg = false;
-	int payload = VW_MAX_MESSAGE_LEN;
-	int* pPayload = &payload; 
-	char readBuffer[VW_MAX_MESSAGE_LEN+1]= {'\0'};
+	uint8_t readBuffer[VW_MAX_MESSAGE_LEN];
+	uint8_t buflen = VW_MAX_MESSAGE_LEN;
 	if ( !isRightRxComm() ){
 		return message;
 	}
 
 //	if ( vw_have_message() ) {
 	if ( vw_wait_rx_max(30)) {
-		okMsg = vw_get_message( (uint8_t*)readBuffer, (uint8_t*) pPayload );
-if (readBuffer[0] != '\0'){
-Serial.println(readBuffer);
-}
+		okMsg = vw_get_message(readBuffer, &buflen );
 		if (okMsg) {
-			message = readBuffer;
-			if ( validateMessage( message, deviceId ) ) {
-				Serial.println( deviceId );
-				Serial.println( this->command );
-				message = this->command;
-			} else {
+			int i;
+			for (i = 0; i < buflen; i++) {
+				message.concat(char(readBuffer[i]));
+			}
+			if ( !validateMessage( message, sourceDev ) ) {
 				message = "";
 			}
 		}
 	}
 	return message;
+}
+
+String RainPComm::getCommand() {
+	return this->command;
+}
+
+unsigned int RainPComm::getTargetDev() {
+	return this->targetDev;
 }
 
 bool RainPComm::startTxComm() {
@@ -161,7 +165,7 @@ String RainPComm::preparePayloadBlock(char* command){
 	return message;
 }
 
-bool RainPComm::validateMessage(String message, unsigned int deviceId){
+bool RainPComm::validateMessage(String message, unsigned int sourceDev){
 	if (message == "") {
 		return false;
 	} else if ( message.substring(0, 1) != "#") {
@@ -171,11 +175,16 @@ bool RainPComm::validateMessage(String message, unsigned int deviceId){
 	String splitter = split( message, "#", 3);
 	if ( splitter == "A" ) {
 	   // Verificamos direcciones de red y de dispositivo
-		if (checkNetworkAddress(message, this->targetNet) && checkDeviceAddress(message, deviceId)) {
+		if (checkNetworkAddress(message, this->targetNet) && checkDeviceAddress(message, sourceDev)) {
 			splitter = split( message, "#", 2);
 			char blockNumber[8] = {'\0'};
 			splitter.toCharArray( blockNumber, splitter.length() + 1);
 			this->addressBlockNumber = atoi(blockNumber);
+			// Se extrae el número de dispositivo de destino
+			splitter = split(message, "#", 5);
+			blockNumber[0] = '\0';
+			splitter.toCharArray( blockNumber, splitter.length() + 1);
+			this->targetDev = atoi(blockNumber);
 			return true;
    		}
 		this->addressBlockNumber = 0;
@@ -210,7 +219,7 @@ bool RainPComm::checkNetworkAddress(String message, unsigned long address) {
 }
 
 bool RainPComm::checkDeviceAddress(String message, unsigned int address) {
-  String dev = split(message, "#", 5);
+  String dev = split(message, "#", 6);
   if (dev.length() == 0 ) {
     return false;
   }

@@ -65,7 +65,7 @@ boolean lcdDisplayStatus = true;
 long lcdTimeStatus = 0;
   // Otras variables
 Devices * pDevices = new Devices();
-RainPComm * pRainPComm = new RainPComm( TX_PIN, RC_PIN, SPEED_COMM, TARGET_NET, SOURCE_DEV);
+RainPComm * pRainPComm = new RainPComm( TX_PIN, RX_PIN, SPEED_COMM, TARGET_NET, SOURCE_DEV);
 RainPComm & rRainPComm = *pRainPComm;
 
 LiquidCrystal * pLcd = new LiquidCrystal(LCD_REGISTER_SELECT, LCD_ENABLE, LCD_DB4, LCD_DB5, LCD_DB6, LCD_DB7);
