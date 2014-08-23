@@ -1,0 +1,4 @@
+Controlador central del sistema RainZ05. 
+El corazón del sistema es una placa Arduino Uno R3.
+El usuario accede al controlador central a través de un teclado y un display LCD.
+El controlador incluye un emisor de RF para el envío de señales a las placas de control de las electroválvulas.
