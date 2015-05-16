@@ -1,0 +1,1 @@
+Proyecto para realizar una estación controladora de riegos basados en placas Arduino.
